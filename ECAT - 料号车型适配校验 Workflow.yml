@@ -1,0 +1,944 @@
+app:
+  description: 根据 Bosch 料号和 car_id / VIN / 车型文字判断是否适配。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: ECAT - 料号车型适配校验 Workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start_node-source-normalize_check_inputs_node-target
+      source: start_node
+      sourceHandle: source
+      target: normalize_check_inputs_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: normalize_check_inputs_node-source-build_part_lookup_url_node-target
+      source: normalize_check_inputs_node
+      sourceHandle: source
+      target: build_part_lookup_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_part_lookup_url_node-source-part_lookup_api_node-target
+      source: build_part_lookup_url_node
+      sourceHandle: source
+      target: part_lookup_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: part_lookup_api_node-source-extract_part_node-target
+      source: part_lookup_api_node
+      sourceHandle: source
+      target: extract_part_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: normalize_check_inputs_node-source-vin_lookup_api_node-target
+      source: normalize_check_inputs_node
+      sourceHandle: source
+      target: vin_lookup_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: normalize_check_inputs_node-source-vehicle_query_api_node-target
+      source: normalize_check_inputs_node
+      sourceHandle: source
+      target: vehicle_query_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: extract_part_node-source-build_check_url_node-target
+      source: extract_part_node
+      sourceHandle: source
+      target: build_check_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: vin_lookup_api_node-source-build_check_url_node-target
+      source: vin_lookup_api_node
+      sourceHandle: source
+      target: build_check_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: vehicle_query_api_node-source-build_check_url_node-target
+      source: vehicle_query_api_node
+      sourceHandle: source
+      target: build_check_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_check_url_node-source-fitment_check_api_node-target
+      source: build_check_url_node
+      sourceHandle: source
+      target: fitment_check_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: fitment_check_api_node-source-format_check_node-target
+      source: fitment_check_api_node
+      sourceHandle: source
+      target: format_check_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_check_node-source-end_node-target
+      source: format_check_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: part_no
+          max_length: 200
+          options: []
+          required: true
+          type: text-input
+          variable: part_no
+        - label: car_id
+          max_length: 500
+          options: []
+          required: false
+          type: text-input
+          variable: car_id
+        - label: vin
+          max_length: 200
+          options: []
+          required: false
+          type: text-input
+          variable: vin
+        - label: vehicle_query
+          max_length: 1000
+          options: []
+          required: false
+          type: paragraph
+          variable: vehicle_query
+      height: 187
+      id: start_node
+      position:
+        x: 80
+        y: 240
+      positionAbsolute:
+        x: 80
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function clean(v) {\n  return String(v || \"\").trim();\n}\n\nfunction\
+          \ normalizePartNo(value) {\n  let partNo = clean(value).toUpperCase().replace(/[^A-Z0-9]/g,\
+          \ \"\");\n  if (partNo.length > 10) partNo = partNo.slice(0, 10);\n  return\
+          \ partNo;\n}\n\nfunction normalizeVehicleIds(value) {\n  return clean(value)\n\
+          \    .split(/[,\\s，、/]+/)\n    .map(v => v.replace(/\\D/g, \"\"))\n    .filter(Boolean)\n\
+          \    .join(\",\");\n}\n\nfunction normalizeVin(value) {\n  const vin = clean(value).toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,\
+          \ \"\");\n  return /^[A-HJ-NPR-Z0-9]{17}$/.test(vin) ? vin : \"\";\n}\n\n\
+          function normalizeVehicleText(text) {\n  let s = clean(text);\n  s = s.replace(/([\\\
+          u4e00-\\u9fa5])([A-Za-z0-9])/g, \"$1 $2\");\n  s = s.replace(/([A-Za-z0-9])([\\\
+          u4e00-\\u9fa5])/g, \"$1 $2\");\n  s = s.replace(/[，,。;；、/\\\\|()[\\]【】{}<>《》:：\\\
+          -—_+]/g, \" \");\n  s = s.replace(/\\s+/g, \" \").trim();\n  return s;\n\
+          }\n\nfunction enc(v) {\n  return encodeURIComponent(clean(v));\n}\n\nfunction\
+          \ extractTerms(text) {\n  const normalized = normalizeVehicleText(text);\n\
+          \  const rawTerms = normalized.match(/[\\u4e00-\\u9fa5A-Za-z0-9·.]+/g) ||\
+          \ [];\n  return Array.from(new Set(rawTerms.map(clean).filter(v => v.length\
+          \ >= 2))).slice(0, 8);\n}\n\nfunction buildVehicleQueryUrl(vehicleQuery)\
+          \ {\n  const base = \"https://sdmfcaryqtnyukafzhip.supabase.co/rest/v1/vehicle_master\"\
+          ;\n  const select = [\n    \"car_id\",\n    \"car_full_info\",\n    \"model_year\"\
+          ,\n    \"displacement\",\n    \"engine_code\",\n    \"manufacturer\",\n\
+          \    \"model_class\"\n  ].join(\",\");\n  const terms = extractTerms(vehicleQuery);\n\
+          \  const params = [\"select=\" + encodeURIComponent(select), \"order=model_year.desc\"\
+          ];\n  if (!terms.length) {\n    params.push(\"limit=0\");\n  } else {\n\
+          \    params.push(\"limit=10\");\n    const filters = terms.map(term => `car_full_info.ilike.*${enc(term)}*`);\n\
+          \    params.push(\"and=(\" + filters.join(\",\") + \")\");\n  }\n  return\
+          \ { url: base + \"?\" + params.join(\"&\"), terms };\n}\n\nfunction main({\
+          \ part_no, car_id, vin, vehicle_query }) {\n  const partNo = normalizePartNo(part_no);\n\
+          \  const carIds = normalizeVehicleIds(car_id);\n  const vinCode = normalizeVin(vin);\n\
+          \  const vehicleText = normalizeVehicleText(vehicle_query);\n  const vehicleQuery\
+          \ = buildVehicleQueryUrl(vehicleText);\n\n  return {\n    part_no: partNo,\n\
+          \    part_is_valid: /^[A-Z0-9]{6,10}$/.test(partNo),\n    car_ids: carIds,\n\
+          \    vin: vinCode,\n    vehicle_query: vehicleText,\n    vehicle_query_url:\
+          \ vehicleQuery.url,\n    vehicle_query_terms: vehicleQuery.terms,\n    vin_query_url:\n\
+          \      \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/car/query-vinCode?vinCode=\"\
+          \ +\n      encodeURIComponent(vinCode) +\n      \"&languageType=zh-cn\"\n\
+          \  };\n}"
+        code_language: javascript
+        desc: Normalize part and vehicle inputs.
+        outputs:
+          car_ids:
+            children: null
+            type: string
+          part_is_valid:
+            children: null
+            type: boolean
+          part_no:
+            children: null
+            type: string
+          vehicle_query:
+            children: null
+            type: string
+          vehicle_query_terms:
+            children: null
+            type: array[string]
+          vehicle_query_url:
+            children: null
+            type: string
+          vin:
+            children: null
+            type: string
+          vin_query_url:
+            children: null
+            type: string
+        selected: false
+        title: 标准化校验输入
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - start_node
+          - car_id
+          value_type: string
+          variable: car_id
+        - value_selector:
+          - start_node
+          - vin
+          value_type: string
+          variable: vin
+        - value_selector:
+          - start_node
+          - vehicle_query
+          value_type: string
+          variable: vehicle_query
+      height: 80
+      id: normalize_check_inputs_node
+      position:
+        x: 420
+        y: 240
+      positionAbsolute:
+        x: 420
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "const crypto = require(\"crypto\");\n\nfunction encryptParam(data)\
+          \ {\n  const keyStr = \"8q7f15a4oc212ef3\";\n  const ivStr = \"8q7f15a4oc212ef3\"\
+          ;\n  const text = data === undefined || data === null ? \"\" : String(data);\n\
+          \  const cipher = crypto.createCipheriv(\"aes-128-cbc\", keyStr, ivStr);\n\
+          \  cipher.setAutoPadding(true);\n  let encrypted = cipher.update(text, \"\
+          utf8\", \"base64\");\n  encrypted += cipher.final(\"base64\");\n  return\
+          \ encodeURIComponent(encodeURIComponent(encrypted));\n}\n\nfunction normalizePartNo(value)\
+          \ {\n  let partNo = String(value || \"\").trim().toUpperCase().replace(/[^A-Z0-9]/g,\
+          \ \"\");\n  if (partNo.length > 10) partNo = partNo.slice(0, 10);\n  return\
+          \ partNo;\n}\n\nfunction main({ part_no }) {\n  const partNo = normalizePartNo(part_no);\n\
+          \  const isValid = /^[A-Z0-9]{6,10}$/.test(partNo);\n  const queryPartNo\
+          \ = isValid ? partNo : \"__INVALID__\";\n  const queryUrl =\n    \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/global/list\"\
+          \ +\n    \"?page=1\" +\n    \"&pageSize=20\" +\n    \"&partNo=\" + encryptParam(queryPartNo)\
+          \ +\n    \"&languageType=\" + encryptParam(\"zh-cn\");\n\n  return {\n \
+          \   part_no: partNo,\n    is_valid: isValid,\n    validation_message: isValid\
+          \ ? \"Part number format is valid.\" : \"请输入有效 Bosch 料号。\",\n    query_url:\
+          \ queryUrl\n  };\n}"
+        code_language: javascript
+        desc: Normalize part_no and build ECAT part lookup URL.
+        outputs:
+          is_valid:
+            children: null
+            type: boolean
+          part_no:
+            children: null
+            type: string
+          query_url:
+            children: null
+            type: string
+          validation_message:
+            children: null
+            type: string
+        selected: false
+        title: 构造料号partId查询
+        type: code
+        variables:
+        - value_selector:
+          - normalize_check_inputs_node
+          - part_no
+          value_type: string
+          variable: part_no
+      height: 96
+      id: build_part_lookup_url_node
+      position:
+        x: 760
+        y: 120
+      positionAbsolute:
+        x: 760
+        y: 120
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT part list by partNo.
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 查询料号partId
+        type: http-request
+        url: '{{#build_part_lookup_url_node.query_url#}}'
+        variables: []
+      height: 152
+      id: part_lookup_api_node
+      position:
+        x: 1100
+        y: 120
+      positionAbsolute:
+        x: 1100
+        y: 120
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction normalize(v)\
+          \ {\n  return String(v || \"\").trim().replace(/\\s+/g, \"\").toUpperCase();\n\
+          }\n\nfunction main({ http_body, part_no, is_valid, validation_message })\
+          \ {\n  if (!is_valid) {\n    return {\n      success: false,\n      part_id:\
+          \ \"\",\n      part_no,\n      part_name: \"\",\n      status: \"\",\n \
+          \     category: \"\",\n      reason: validation_message\n    };\n  }\n\n\
+          \  const data = safeJsonParse(http_body, {});\n  const partList = data?.resultData?.partList\
+          \ || [];\n  const target = normalize(part_no);\n  const part = partList.find(p\
+          \ => normalize(p.partNo) === target) || partList[0] || null;\n\n  if (!part\
+          \ || !part.partId) {\n    return {\n      success: false,\n      part_id:\
+          \ \"\",\n      part_no,\n      part_name: \"\",\n      status: \"\",\n \
+          \     category: \"\",\n      reason: `ECAT 未查询到料号 ${part_no} 对应的 partId。`\n\
+          \    };\n  }\n\n  return {\n    success: true,\n    part_id: String(part.partId\
+          \ || \"\"),\n    part_no: part.partNo || part_no,\n    part_name: part.partName\
+          \ || \"\",\n    status: part.partNoStatus || \"\",\n    category: [part.category1Name,\
+          \ part.category2Name].filter(Boolean).join(\" / \"),\n    reason: `已解析料号\
+          \ ${part.partNo || part_no} 的 partId=${part.partId}`\n  };\n}"
+        code_language: javascript
+        desc: Extract partId.
+        outputs:
+          category:
+            children: null
+            type: string
+          part_id:
+            children: null
+            type: string
+          part_name:
+            children: null
+            type: string
+          part_no:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          status:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 提取partId
+        type: code
+        variables:
+        - value_selector:
+          - part_lookup_api_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - build_part_lookup_url_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - build_part_lookup_url_node
+          - is_valid
+          value_type: boolean
+          variable: is_valid
+        - value_selector:
+          - build_part_lookup_url_node
+          - validation_message
+          value_type: string
+          variable: validation_message
+      height: 80
+      id: extract_part_node
+      position:
+        x: 1440
+        y: 120
+      positionAbsolute:
+        x: 1440
+        y: 120
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT VIN lookup; blank VIN returns no vehicle and is ignored.
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: VIN解析车型
+        type: http-request
+        url: '{{#normalize_check_inputs_node.vin_query_url#}}'
+        variables: []
+      height: 168
+      id: vin_lookup_api_node
+      position:
+        x: 760
+        y: 380
+      positionAbsolute:
+        x: 760
+        y: 380
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Query vehicle_master if vehicle_query is provided.
+        headers: 'apikey: sb_publishable_Tg6-WGIm3dT92JDmpmF2bA_2bTXgD4e
+
+          Authorization: Bearer sb_publishable_Tg6-WGIm3dT92JDmpmF2bA_2bTXgD4e'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 车型文字解析候选
+        type: http-request
+        url: '{{#normalize_check_inputs_node.vehicle_query_url#}}'
+        variables: []
+      height: 168
+      id: vehicle_query_api_node
+      position:
+        x: 760
+        y: 620
+      positionAbsolute:
+        x: 760
+        y: 620
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction idsFromVinBody(body)\
+          \ {\n  const data = safeJsonParse(body, {});\n  const rd = data.resultData\
+          \ || {};\n  if (rd.carIds) {\n    return String(rd.carIds).split(\",\").map(v\
+          \ => v.trim()).filter(Boolean);\n  }\n  const list = Array.isArray(rd.carInfoList)\
+          \ ? rd.carInfoList : [];\n  return list.map(v => String(v.carId || \"\"\
+          ).trim()).filter(Boolean);\n}\n\nfunction idsFromVehicleQueryBody(body)\
+          \ {\n  const rows = safeJsonParse(body, []);\n  if (!Array.isArray(rows))\
+          \ return [];\n  return rows.map(row => String(row.car_id || row.carId ||\
+          \ \"\").trim()).filter(Boolean);\n}\n\nfunction vehicleSummaryFromQueryBody(body)\
+          \ {\n  const rows = safeJsonParse(body, []);\n  if (!Array.isArray(rows))\
+          \ return [];\n  return rows.slice(0, 10).map(row => ({\n    car_id: row.car_id\
+          \ || row.carId || \"\",\n    display_name: row.car_full_info || row.carFullInfo\
+          \ || \"\",\n    model_year: row.model_year || row.modelYear || \"\",\n \
+          \   engine: row.engine_code || row.engineCode || \"\"\n  }));\n}\n\nfunction\
+          \ main({\n  part_success,\n  part_id,\n  part_no,\n  part_reason,\n  car_ids,\n\
+          \  vin,\n  vehicle_query,\n  vin_body,\n  vehicle_query_body\n}) {\n  let\
+          \ source = \"\";\n  let targetIds = [];\n  let candidateVehicles = [];\n\
+          \n  if (car_ids) {\n    source = \"car_id\";\n    targetIds = String(car_ids).split(\"\
+          ,\").filter(Boolean);\n  } else if (vin) {\n    source = \"vin\";\n    targetIds\
+          \ = idsFromVinBody(vin_body);\n  } else if (vehicle_query) {\n    source\
+          \ = \"vehicle_query\";\n    targetIds = idsFromVehicleQueryBody(vehicle_query_body);\n\
+          \    candidateVehicles = vehicleSummaryFromQueryBody(vehicle_query_body);\n\
+          \  }\n\n  const queryUrl =\n    \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/car/web/query\"\
+          \ +\n    \"?partIds=\" + encodeURIComponent(part_id || \"__INVALID__\")\
+          \ +\n    (targetIds.length ? \"&carIds=\" + encodeURIComponent(targetIds.join(\"\
+          ,\")) : \"\") +\n    \"&languageType=zh-cn\";\n\n  return {\n    success:\
+          \ Boolean(part_success && part_id),\n    query_url: queryUrl,\n    part_no,\n\
+          \    part_id: part_id || \"\",\n    target_source: source || \"\",\n   \
+          \ target_car_ids: targetIds.join(\",\"),\n    target_count: targetIds.length,\n\
+          \    candidate_vehicles_json: JSON.stringify(candidateVehicles, null, 2),\n\
+          \    reason: part_success ? \"构造适配校验 URL 成功。\" : part_reason\n  };\n}"
+        code_language: javascript
+        desc: Resolve target carIds and build ECAT fitment check URL.
+        outputs:
+          candidate_vehicles_json:
+            children: null
+            type: string
+          part_id:
+            children: null
+            type: string
+          part_no:
+            children: null
+            type: string
+          query_url:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+          target_car_ids:
+            children: null
+            type: string
+          target_count:
+            children: null
+            type: number
+          target_source:
+            children: null
+            type: string
+        selected: false
+        title: 构造适配校验URL
+        type: code
+        variables:
+        - value_selector:
+          - extract_part_node
+          - success
+          value_type: boolean
+          variable: part_success
+        - value_selector:
+          - extract_part_node
+          - part_id
+          value_type: string
+          variable: part_id
+        - value_selector:
+          - extract_part_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - extract_part_node
+          - reason
+          value_type: string
+          variable: part_reason
+        - value_selector:
+          - normalize_check_inputs_node
+          - car_ids
+          value_type: string
+          variable: car_ids
+        - value_selector:
+          - normalize_check_inputs_node
+          - vin
+          value_type: string
+          variable: vin
+        - value_selector:
+          - normalize_check_inputs_node
+          - vehicle_query
+          value_type: string
+          variable: vehicle_query
+        - value_selector:
+          - vin_lookup_api_node
+          - body
+          value_type: string
+          variable: vin_body
+        - value_selector:
+          - vehicle_query_api_node
+          - body
+          value_type: string
+          variable: vehicle_query_body
+      height: 96
+      id: build_check_url_node
+      position:
+        x: 1780
+        y: 240
+      positionAbsolute:
+        x: 1780
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT part-car query for selected carIds.
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 请求适配校验
+        type: http-request
+        url: '{{#build_check_url_node.query_url#}}'
+        variables: []
+      height: 168
+      id: fitment_check_api_node
+      position:
+        x: 2120
+        y: 240
+      positionAbsolute:
+        x: 2120
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction main({\n  http_body,\n\
+          \  part_success,\n  part_no,\n  part_name,\n  part_reason,\n  target_source,\n\
+          \  target_car_ids,\n  target_count,\n  candidate_vehicles_json\n}) {\n \
+          \ if (!part_success) {\n    return {\n      fit: \"uncertain\",\n      confidence:\
+          \ \"low\",\n      reason: part_reason,\n      matched_vehicles_json: \"\
+          []\",\n      result: part_reason\n    };\n  }\n\n  const requestedIds =\
+          \ String(target_car_ids || \"\").split(\",\").map(v => v.trim()).filter(Boolean);\n\
+          \  if (!requestedIds.length) {\n    return {\n      fit: \"uncertain\",\n\
+          \      confidence: \"low\",\n      reason: \"缺少可校验车型。请提供 car_id，或提供 VIN\
+          \ / 更明确车型描述先解析车型。\",\n      matched_vehicles_json: \"[]\",\n      result:\
+          \ \"无法判断适配：缺少可校验车型。请提供 car_id，或提供 VIN / 更明确车型描述。\"\n    };\n  }\n\n  const\
+          \ data = safeJsonParse(http_body, {});\n  const vo = data?.resultData?.partVOList?.[0]\
+          \ || {};\n  const carDetailList = Array.isArray(vo.carDetailList) ? vo.carDetailList\
+          \ : [];\n  const requested = new Set(requestedIds);\n  const matched = carDetailList.filter(row\
+          \ => requested.has(String(row.carId || \"\")));\n  const candidateVehicles\
+          \ = safeJsonParse(candidate_vehicles_json, []);\n\n  let fit = \"false\"\
+          ;\n  let confidence = target_source === \"vehicle_query\" ? \"medium\" :\
+          \ \"high\";\n  let reason = `ECAT 查询结果未显示料号 ${part_no} 适配目标车型。`;\n\n  if\
+          \ (matched.length > 0) {\n    fit = \"true\";\n    confidence = target_source\
+          \ === \"vehicle_query\" ? \"medium\" : \"high\";\n    reason = `ECAT 查询结果显示料号\
+          \ ${part_no} 适配目标车型。`;\n  } else if (target_source === \"vehicle_query\"\
+          \ && Number(target_count || 0) > 1) {\n    fit = \"uncertain\";\n    confidence\
+          \ = \"low\";\n    reason = \"车型文字解析到了多个候选，但当前候选范围内未命中适配；建议先让用户确认具体 car_id\
+          \ 后再判断。\";\n  }\n\n  const matchedVehicles = matched.map((row, index) =>\
+          \ ({\n    index: index + 1,\n    car_id: row.carId || \"\",\n    display_name:\
+          \ row.carFullInfo || \"\",\n    year_range: row.producedYear && row.discontinuedYear\
+          \ && row.producedYear !== row.discontinuedYear\n      ? `${row.producedYear}-${row.discontinuedYear}`\n\
+          \      : (row.modelYear || row.producedYear || row.discontinuedYear || \"\
+          \"),\n    engine: row.engineCode || \"\",\n    displacement: row.displacement\
+          \ || \"\"\n  }));\n\n  const lines = [];\n  lines.push(`适配判断：${fit}`);\n\
+          \  lines.push(\"\");\n  lines.push(`原因：${reason}`);\n  lines.push(\"\");\n\
+          \  lines.push(`料号：${part_no}${part_name ? `（${part_name}）` : \"\"}`);\n\
+          \  lines.push(`车型来源：${target_source || \"-\"}`);\n  lines.push(`校验车型ID：${requestedIds.join(\"\
+          , \")}`);\n\n  if (matchedVehicles.length) {\n    lines.push(\"\");\n  \
+          \  lines.push(\"| 序号 | car_id | 车型信息 | 年款/生产年 | 发动机 | 排量 |\");\n    lines.push(\"\
+          |---:|---|---|---|---|---|\");\n    matchedVehicles.forEach(v => {\n   \
+          \   lines.push(`| ${v.index} | ${v.car_id || \"-\"} | ${v.display_name ||\
+          \ \"-\"} | ${v.year_range || \"-\"} | ${v.engine || \"-\"} | ${v.displacement\
+          \ || \"-\"} |`);\n    });\n  }\n\n  if (target_source === \"vehicle_query\"\
+          \ && candidateVehicles.length) {\n    lines.push(\"\");\n    lines.push(\"\
+          车型文字候选：\");\n    candidateVehicles.slice(0, 5).forEach((v, index) => {\n\
+          \      lines.push(`${index + 1}. ${v.car_id || \"-\"} - ${v.display_name\
+          \ || \"-\"}`);\n    });\n  }\n\n  return {\n    fit,\n    confidence,\n\
+          \    reason,\n    matched_vehicles_json: JSON.stringify(matchedVehicles,\
+          \ null, 2),\n    result: lines.join(\"\\n\")\n  };\n}"
+        code_language: javascript
+        desc: Format fitment check result.
+        outputs:
+          confidence:
+            children: null
+            type: string
+          fit:
+            children: null
+            type: string
+          matched_vehicles_json:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 整理适配判断结果
+        type: code
+        variables:
+        - value_selector:
+          - fitment_check_api_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - extract_part_node
+          - success
+          value_type: boolean
+          variable: part_success
+        - value_selector:
+          - extract_part_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - extract_part_node
+          - part_name
+          value_type: string
+          variable: part_name
+        - value_selector:
+          - extract_part_node
+          - reason
+          value_type: string
+          variable: part_reason
+        - value_selector:
+          - build_check_url_node
+          - target_source
+          value_type: string
+          variable: target_source
+        - value_selector:
+          - build_check_url_node
+          - target_car_ids
+          value_type: string
+          variable: target_car_ids
+        - value_selector:
+          - build_check_url_node
+          - target_count
+          value_type: number
+          variable: target_count
+        - value_selector:
+          - build_check_url_node
+          - candidate_vehicles_json
+          value_type: string
+          variable: candidate_vehicles_json
+      height: 80
+      id: format_check_node
+      position:
+        x: 2460
+        y: 240
+      positionAbsolute:
+        x: 2460
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_check_node
+          - result
+          value_type: string
+          variable: result
+        - value_selector:
+          - format_check_node
+          - fit
+          value_type: string
+          variable: fit
+        - value_selector:
+          - format_check_node
+          - confidence
+          value_type: string
+          variable: confidence
+        - value_selector:
+          - format_check_node
+          - reason
+          value_type: string
+          variable: reason
+        - value_selector:
+          - format_check_node
+          - matched_vehicles_json
+          value_type: string
+          variable: matched_vehicles_json
+        selected: false
+        title: 结束
+        type: end
+      height: 192
+      id: end_node
+      position:
+        x: 2800
+        y: 240
+      positionAbsolute:
+        x: 2800
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -1403
+      y: 85
+      zoom: 0.8
+  rag_pipeline_variables: []

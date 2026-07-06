@@ -1,0 +1,721 @@
+app:
+  description: 根据已确认车型 car_id 和配件名称，查询 ECAT 产品分类并返回可用 Bosch 料号列表。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: ECAT - 车型配件查询 Workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start_node-source-normalize_input_node-target
+      source: start_node
+      sourceHandle: source
+      target: normalize_input_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: normalize_input_node-source-category_api_node-target
+      source: normalize_input_node
+      sourceHandle: source
+      target: category_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: category_api_node-source-format_categories_node-target
+      source: category_api_node
+      sourceHandle: source
+      target: format_categories_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: format_categories_node-source-match_category_node-target
+      source: format_categories_node
+      sourceHandle: source
+      target: match_category_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: match_category_node-source-build_part_url_node-target
+      source: match_category_node
+      sourceHandle: source
+      target: build_part_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_part_url_node-source-part_api_node-target
+      source: build_part_url_node
+      sourceHandle: source
+      target: part_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: part_api_node-source-format_parts_node-target
+      source: part_api_node
+      sourceHandle: source
+      target: format_parts_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_parts_node-source-end_node-target
+      source: format_parts_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: car_id
+          max_length: 200
+          options: []
+          required: true
+          type: text-input
+          variable: car_id
+        - label: 配件名称
+          max_length: 200
+          options: []
+          required: true
+          type: text-input
+          variable: part_keyword
+      height: 135
+      id: start_node
+      position:
+        x: 80
+        y: 260
+      positionAbsolute:
+        x: 80
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function main({ car_id, part_keyword }) {\n  const rawCarIds = String(car_id\
+          \ || \"\").trim();\n  const cleanedCarIds = rawCarIds\n    .replace(/[，、;；\\\
+          s]+/g, \",\")\n    .split(\",\")\n    .map(v => v.trim())\n    .filter(Boolean)\n\
+          \    .join(\",\");\n\n  const partNeed = String(part_keyword || \"\").trim();\n\
+          \n  return {\n    car_ids: cleanedCarIds,\n    ecat_car_ids_param: cleanedCarIds\
+          \ ? \",\" + cleanedCarIds : \"\",\n    part_keyword: partNeed,\n    is_valid:\
+          \ !!cleanedCarIds && !!partNeed,\n    validation_message: !cleanedCarIds\n\
+          \      ? \"缺少 car_id。请先通过 VIN 查询或模糊车型确认获得 car_id。\"\n      : (!partNeed\
+          \ ? \"缺少配件名称。\" : \"Input is valid.\")\n  };\n}"
+        code_language: javascript
+        desc: Normalize car_id and part keyword.
+        outputs:
+          car_ids:
+            children: null
+            type: string
+          ecat_car_ids_param:
+            children: null
+            type: string
+          is_valid:
+            children: null
+            type: boolean
+          part_keyword:
+            children: null
+            type: string
+          validation_message:
+            children: null
+            type: string
+        selected: false
+        title: 标准化输入
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - car_id
+          value_type: string
+          variable: car_id
+        - value_selector:
+          - start_node
+          - part_keyword
+          value_type: string
+          variable: part_keyword
+      height: 80
+      id: normalize_input_node
+      position:
+        x: 380
+        y: 260
+      positionAbsolute:
+        x: 380
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: category-body
+            key: ''
+            type: text
+            value: "{\n  \"carIds\": \"{{#normalize_input_node.ecat_car_ids_param#}}\"\
+              ,\n  \"levelIds\": \"\",\n  \"isSelectAll\": \"0\",\n  \"brandId\":\
+              \ \"\",\n  \"manufacturer\": \"\",\n  \"modelClass\": \"\",\n  \"modelName\"\
+              : \"\",\n  \"modelYear\": \"\",\n  \"displacement\": \"\",\n  \"languageType\"\
+              : \"zh-cn\"\n}"
+          type: json
+        desc: Query available product categories for selected ECAT car_id.
+        headers: 'Content-Type:application/json
+
+          Accept:application/json
+
+          Origin:https://boschaftermarket.com.cn
+
+          Referer:https://boschaftermarket.com.cn/Dealerportal/gb/cn/parts'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 查询产品分类
+        type: http-request
+        url: https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/category/global/getCategoryByCarList
+        variables: []
+      height: 213
+      id: category_api_node
+      position:
+        x: 700
+        y: 260
+      positionAbsolute:
+        x: 700
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction main({ http_body\
+          \ }) {\n  const data = safeJsonParse(http_body, {});\n  const categoryList\
+          \ = data?.resultData?.categoryList || data?.resultData?.categoryListForCar\
+          \ || [];\n  const rows = [];\n  const seen = new Set();\n\n  for (const\
+          \ c1 of categoryList) {\n    const category1Name = c1.category1Name || \"\
+          \";\n    const subList = Array.isArray(c1.subList) ? c1.subList : [];\n\n\
+          \    if (subList.length > 0) {\n      for (const c2 of subList) {\n    \
+          \    const row = {\n          category1Name: c2.category1Name || category1Name\
+          \ || \"\",\n          category2Name: c2.category2Name || \"\",\n       \
+          \   levelIds: c2.levelIds || c2.levelId || \"\"\n        };\n        const\
+          \ key = `${row.category1Name}__${row.category2Name}__${row.levelIds}`;\n\
+          \        if (!row.category2Name) continue;\n        if (seen.has(key)) continue;\n\
+          \        seen.add(key);\n        rows.push(row);\n      }\n    } else {\n\
+          \      const row = {\n        category1Name,\n        category2Name: c1.category2Name\
+          \ || \"\",\n        levelIds: c1.levelIds || c1.levelId || \"\"\n      };\n\
+          \      const key = `${row.category1Name}__${row.category2Name}__${row.levelIds}`;\n\
+          \      if (!row.category2Name) continue;\n      if (seen.has(key)) continue;\n\
+          \      seen.add(key);\n      rows.push(row);\n    }\n  }\n\n  return {\n\
+          \    success: rows.length > 0,\n    category_count: rows.length,\n    category_rows_json:\
+          \ JSON.stringify(rows, null, 2),\n    category2_names_json: JSON.stringify(rows.map(r\
+          \ => r.category2Name), null, 2)\n  };\n}"
+        code_language: javascript
+        desc: Flatten category tree.
+        outputs:
+          category2_names_json:
+            children: null
+            type: string
+          category_count:
+            children: null
+            type: number
+          category_rows_json:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 整理产品分类
+        type: code
+        variables:
+        - value_selector:
+          - category_api_node
+          - body
+          value_type: string
+          variable: http_body
+      height: 80
+      id: format_categories_node
+      position:
+        x: 1020
+        y: 260
+      positionAbsolute:
+        x: 1020
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction normalize(v)\
+          \ {\n  return String(v || \"\").trim().replace(/\\s+/g, \"\").toLowerCase();\n\
+          }\n\nfunction pickProductNeed(v) {\n  const pq = v && typeof v === \"object\"\
+          \ ? v : {};\n  return (\n    pq.normalized_product_name ||\n    pq.standard_product_need\
+          \ ||\n    pq.raw_product_need ||\n    pq.part_keyword ||\n    \"\"\n  );\n\
+          }\n\nfunction expandSynonyms(partKeyword) {\n  const key = normalize(partKeyword);\n\
+          \  const terms = new Set([key]);\n  const synonymGroups = [\n    [\"雨刮\"\
+          , \"雨刷\", \"雨刮器\", \"刮水器\", \"风翼\", \"神翼\", \"wiper\"],\n    [\"后刹车片\",\
+          \ \"后片\", \"后刹\", \"后制动片\"],\n    [\"前刹车片\", \"前片\", \"前刹\", \"前制动片\"],\n\
+          \    [\"刹车片\", \"制动片\", \"刹车\", \"制动\"],\n    [\"机油滤清器\", \"机滤\", \"机油滤\"\
+          , \"机油格\"],\n    [\"空气滤清器\", \"空滤\", \"空气滤\", \"空气格\"],\n    [\"空调滤清器\"\
+          , \"空调滤\", \"空调滤芯\", \"空调格\"],\n    [\"点火线圈\", \"点火包\"],\n    [\"火花塞\",\
+          \ \"火嘴\", \"sparkplug\"],\n    [\"蓄电池\", \"电瓶\", \"battery\"],\n    [\"\
+          发动机油\", \"机油\", \"润滑油\"]\n  ];\n\n  synonymGroups.forEach(group => {\n \
+          \   const normalizedGroup = group.map(normalize);\n    if (normalizedGroup.some(item\
+          \ => key === item || key.includes(item) || item.includes(key))) {\n    \
+          \  normalizedGroup.forEach(item => terms.add(item));\n    }\n  });\n\n \
+          \ return Array.from(terms).filter(Boolean);\n}\n\nfunction uniqueRows(rows)\
+          \ {\n  const seen = new Set();\n  const output = [];\n  rows.forEach(row\
+          \ => {\n    const key = `${row.category1Name || \"\"}__${row.category2Name\
+          \ || \"\"}__${row.levelIds || \"\"}`;\n    if (seen.has(key)) return;\n\
+          \    seen.add(key);\n    output.push(row);\n  });\n  return output;\n}\n\
+          \nfunction makeText(matchType, reason, rows, partKeyword) {\n  const lines\
+          \ = [];\n  lines.push(`已将“${partKeyword}”映射到 ECAT 产品分类：${reason}`);\n  lines.push(\"\
+          \");\n  lines.push(\"| 序号 | 一级分类 | 二级分类 | levelIds |\");\n  lines.push(\"\
+          |---:|---|---|---|\");\n  rows.slice(0, 20).forEach((row, index) => {\n\
+          \    lines.push(`| ${index + 1} | ${row.category1Name || \"-\"} | ${row.category2Name\
+          \ || \"-\"} | ${row.levelIds || \"-\"} |`);\n  });\n  return lines.join(\"\
+          \\n\");\n}\n\nfunction main({ category_rows_json, part_keyword }) {\n  const\
+          \ rows = safeJsonParse(category_rows_json, []);\n  const partNeed = pickProductNeed(\n\
+          \    typeof part_keyword === \"object\" ? part_keyword : { raw_product_need:\
+          \ part_keyword }\n  );\n  const needText = normalize(partNeed);\n  const\
+          \ terms = expandSynonyms(partNeed);\n\n  if (!needText) {\n    return {\n\
+          \      success: false,\n      match_type: \"missing_part_need\",\n     \
+          \ category2_names_json: \"[]\",\n      matched_category_text: \"缺少配件名称。\"\
+          ,\n      matched_category_count: 0,\n      level_ids: \"\"\n    };\n  }\n\
+          \n  if (!Array.isArray(rows) || rows.length === 0) {\n    return {\n   \
+          \   success: false,\n      match_type: \"no_category\",\n      category2_names_json:\
+          \ \"[]\",\n      matched_category_text: \"当前车型没有返回可用产品分类。\",\n      matched_category_count:\
+          \ 0,\n      level_ids: \"\"\n    };\n  }\n\n  const flatRows = uniqueRows(rows.map(row\
+          \ => ({\n    category1Name: row.category1Name || row.categoryName1 || row.firstCategoryName\
+          \ || \"\",\n    category2Name: row.category2Name || row.categoryName2 ||\
+          \ row.secondCategoryName || \"\",\n    levelIds: row.levelIds || row.levelId\
+          \ || \"\"\n  })).filter(row => row.category1Name || row.category2Name));\n\
+          \n  // 1. 精确匹配二级分类：点火线圈 -> 只命中点火线圈，避免同时带出点火线。\n  let matched = flatRows.filter(row\
+          \ => terms.some(term => normalize(row.category2Name) === term));\n  let\
+          \ matchType = \"category2_exact\";\n  let reason = matched.length ? `精确命中二级分类\
+          \ ${matched.map(row => row.category2Name).join(\"、\")}` : \"\";\n\n  //\
+          \ 2. 精确匹配一级分类：刹车/滤清器/雨刮这类大类需求展开下级分类。\n  if (!matched.length) {\n    const\
+          \ exactCategory1Name = flatRows.find(row => terms.some(term => normalize(row.category1Name)\
+          \ === term))?.category1Name || \"\";\n    if (exactCategory1Name) {\n  \
+          \    matched = flatRows.filter(row => row.category1Name === exactCategory1Name);\n\
+          \      matchType = \"category1_exact_group\";\n      reason = `精确命中一级分类\
+          \ ${exactCategory1Name}，展开 ${matched.length} 个二级分类`;\n    }\n  }\n\n  //\
+          \ 3. 模糊匹配二级分类。\n  if (!matched.length && needText.length >= 2) {\n    matched\
+          \ = flatRows.filter(row => {\n      const c2 = normalize(row.category2Name);\n\
+          \      if (!c2) return false;\n      return terms.some(term => c2.includes(term)\
+          \ || term.includes(c2));\n    });\n    if (matched.length) {\n      matchType\
+          \ = \"category2_fuzzy\";\n      reason = `模糊命中 ${matched.length} 个二级分类`;\n\
+          \    }\n  }\n\n  // 4. 模糊匹配一级分类作为兜底。\n  if (!matched.length && needText.length\
+          \ >= 2) {\n    const fuzzyCategory1Name = flatRows.find(row => {\n     \
+          \ const c1 = normalize(row.category1Name);\n      if (!c1) return false;\n\
+          \      return terms.some(term => c1.includes(term) || term.includes(c1));\n\
+          \    })?.category1Name || \"\";\n    if (fuzzyCategory1Name) {\n      matched\
+          \ = flatRows.filter(row => row.category1Name === fuzzyCategory1Name);\n\
+          \      matchType = \"category1_fuzzy_group\";\n      reason = `模糊命中一级分类\
+          \ ${fuzzyCategory1Name}，展开 ${matched.length} 个二级分类`;\n    }\n  }\n\n  if\
+          \ (!matched.length) {\n    return {\n      success: false,\n      match_type:\
+          \ \"no_match\",\n      category2_names_json: \"[]\",\n      matched_category_text:\
+          \ `未匹配到“${partNeed}”对应的 ECAT 产品分类。`,\n      matched_category_count: 0,\n\
+          \      level_ids: \"\"\n    };\n  }\n\n  matched = uniqueRows(matched);\n\
+          \  const category2Names = Array.from(new Set(matched.map(row => row.category2Name).filter(Boolean)));\n\
+          \  const levelIds = Array.from(new Set(matched.map(row => row.levelIds).filter(Boolean))).join(\"\
+          ,\");\n\n  return {\n    success: category2Names.length > 0,\n    match_type:\
+          \ matchType,\n    category2_names_json: JSON.stringify(category2Names, null,\
+          \ 2),\n    matched_category_text: makeText(matchType, reason, matched, partNeed),\n\
+          \    matched_category_count: category2Names.length,\n    level_ids: levelIds\n\
+          \  };\n}"
+        code_language: javascript
+        desc: Match user part keyword to ECAT category names.
+        outputs:
+          category2_names_json:
+            children: null
+            type: string
+          level_ids:
+            children: null
+            type: string
+          match_type:
+            children: null
+            type: string
+          matched_category_count:
+            children: null
+            type: number
+          matched_category_text:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 匹配配件分类
+        type: code
+        variables:
+        - value_selector:
+          - format_categories_node
+          - category_rows_json
+          value_type: string
+          variable: category_rows_json
+        - value_selector:
+          - normalize_input_node
+          - part_keyword
+          value_type: string
+          variable: part_keyword
+      height: 96
+      id: match_category_node
+      position:
+        x: 1340
+        y: 260
+      positionAbsolute:
+        x: 1340
+        y: 260
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "const crypto = require(\"crypto\");\n\nfunction safeJsonParse(value,\
+          \ fallback) {\n  if (!value) return fallback;\n  if (typeof value === \"\
+          object\") return value;\n  try {\n    return JSON.parse(value);\n  } catch\
+          \ (e) {\n    return fallback;\n  }\n}\n\nfunction encryptParam(data) {\n\
+          \  const keyStr = \"8q7f15a4oc212ef3\";\n  const ivStr = \"8q7f15a4oc212ef3\"\
+          ;\n  const text = data === undefined || data === null ? \"\" : String(data);\n\
+          \  const cipher = crypto.createCipheriv(\"aes-128-cbc\", keyStr, ivStr);\n\
+          \  cipher.setAutoPadding(true);\n  let encrypted = cipher.update(text, \"\
+          utf8\", \"base64\");\n  encrypted += cipher.final(\"base64\");\n  return\
+          \ encodeURIComponent(encodeURIComponent(encrypted));\n}\n\nfunction main({\
+          \ ecat_car_ids_param, category2_names_json, level_ids }) {\n  const category2Names\
+          \ = safeJsonParse(category2_names_json, []);\n  if (!ecat_car_ids_param\
+          \ || !Array.isArray(category2Names) || category2Names.length === 0) {\n\
+          \    return {\n      success: false,\n      query_url: \"\",\n      reason:\
+          \ \"缺少 car_id 或产品分类。\"\n    };\n  }\n\n  const baseUrl = \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/global/list\"\
+          ;\n  const category2NamesPlain = \",\" + category2Names.join(\",\");\n \
+          \ const levelIdsPlain = level_ids || \"\";\n\n  const queryUrl =\n    baseUrl\
+          \ +\n    \"?page=1\" +\n    \"&pageSize=100\" +\n    \"&category2Names=\"\
+          \ + encryptParam(category2NamesPlain) +\n    \"&levelIds=\" + encryptParam(levelIdsPlain)\
+          \ +\n    \"&carIds=\" + encryptParam(ecat_car_ids_param) +\n    \"&languageType=\"\
+          \ + encryptParam(\"zh-cn\");\n\n  return {\n    success: true,\n    query_url:\
+          \ queryUrl,\n    reason: `构造配件查询 URL 成功，产品分类数=${category2Names.length}`\n\
+          \  };\n}"
+        code_language: javascript
+        desc: Build encrypted ECAT part search URL.
+        outputs:
+          query_url:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 构造配件查询URL
+        type: code
+        variables:
+        - value_selector:
+          - normalize_input_node
+          - ecat_car_ids_param
+          value_type: string
+          variable: ecat_car_ids_param
+        - value_selector:
+          - match_category_node
+          - category2_names_json
+          value_type: string
+          variable: category2_names_json
+        - value_selector:
+          - match_category_node
+          - level_ids
+          value_type: string
+          variable: level_ids
+      height: 96
+      id: build_part_url_node
+      position:
+        x: 1660
+        y: 260
+      positionAbsolute:
+        x: 1660
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT part global list API.
+        headers: 'Referer:https://boschaftermarket.com.cn/Dealerportal/gb/cn/parts
+
+          User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+          (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 查询具体配件
+        type: http-request
+        url: '{{#build_part_url_node.query_url#}}'
+        variables: []
+      height: 152
+      id: part_api_node
+      position:
+        x: 1980
+        y: 260
+      positionAbsolute:
+        x: 1980
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction normalize(v)\
+          \ {\n  return String(v || \"\").trim().replace(/\\s+/g, \"\").toLowerCase();\n\
+          }\n\nfunction expandTerms(partKeyword) {\n  const key = normalize(partKeyword);\n\
+          \  const terms = new Set([key]);\n  const synonymGroups = [\n    [\"雨刮\"\
+          , \"雨刷\", \"刮水器\", \"风翼\", \"神翼\", \"wiper\"],\n    [\"刹车片\", \"制动片\", \"\
+          前片\", \"后片\", \"刹车\", \"制动\"],\n    [\"机油滤清器\", \"机滤\", \"机油滤\", \"滤清器\"\
+          ],\n    [\"空气滤清器\", \"空滤\", \"空气滤\"],\n    [\"空调滤清器\", \"空调滤\", \"空调滤芯\"\
+          ],\n    [\"火花塞\", \"sparkplug\"],\n    [\"蓄电池\", \"电瓶\", \"battery\"],\n\
+          \    [\"发动机油\", \"机油\", \"润滑油\"]\n  ];\n  synonymGroups.forEach(group =>\
+          \ {\n    if (group.some(item => key.includes(normalize(item)) || normalize(item).includes(key)))\
+          \ {\n      group.forEach(item => terms.add(normalize(item)));\n    }\n \
+          \ });\n  return Array.from(terms).filter(Boolean);\n}\n\nfunction main({\
+          \ http_body, part_keyword, matched_category_text }) {\n  const data = safeJsonParse(http_body,\
+          \ {});\n  const partList = data?.resultData?.partList || [];\n  const totalCounts\
+          \ = data?.resultData?.totalCounts || partList.length || 0;\n  const terms\
+          \ = expandTerms(part_keyword);\n\n  const mapped = partList.map((p, index)\
+          \ => {\n    const features = Array.isArray(p.partFeatureValueList) ? p.partFeatureValueList\
+          \ : [];\n    const specs = features\n      .map(f => `${f.featureNameCn\
+          \ || f.featureName || \"\"}:${f.featureValueString || f.featureValue ||\
+          \ \"\"}`)\n      .filter(v => v && !v.endsWith(\":\"));\n    return {\n\
+          \      index: index + 1,\n      part_no: p.partNo || \"\",\n      alias:\
+          \ p.typeFormular || \"\",\n      status: p.partNoStatus || \"\",\n     \
+          \ part_name: p.partName || \"\",\n      category1Name: p.category1Name ||\
+          \ \"\",\n      category2Name: p.category2Name || \"\",\n      remark: p.appDesEn\
+          \ || p.appDesCn || \"\",\n      model_years: Array.isArray(p.carsModelYearList)\
+          \ ? p.carsModelYearList.join(\", \") : \"\",\n      specs: specs.join(\"\
+          ; \")\n    };\n  });\n\n  let filtered = mapped.filter(row => {\n    const\
+          \ haystack = normalize([\n      row.part_no,\n      row.alias,\n      row.part_name,\n\
+          \      row.category1Name,\n      row.category2Name,\n      row.remark,\n\
+          \      row.specs\n    ].join(\" \"));\n    return terms.some(term => haystack.includes(term));\n\
+          \  });\n\n  if (filtered.length === 0 && mapped.length > 0) {\n    filtered\
+          \ = mapped.slice(0, 20);\n  } else {\n    filtered = filtered.slice(0, 20);\n\
+          \  }\n\n  if (filtered.length === 0) {\n    return {\n      success: false,\n\
+          \      total_count: 0,\n      parts_json: \"[]\",\n      result: `${matched_category_text}\\\
+          n\\n未查询到“${part_keyword}”对应配件。`\n    };\n  }\n\n  const lines = [];\n  lines.push(`车型配件查询完成。ECAT\
+          \ 返回 ${totalCounts} 条，当前展示 ${filtered.length} 条。`);\n  lines.push(\"\");\n\
+          \  lines.push(\"| 序号 | 物料号 | 别称 | 状态 | 名称 | 分类 | 适配年份 | 规格 |\");\n  lines.push(\"\
+          |---:|---|---|---|---|---|---|---|\");\n  filtered.forEach(row => {\n  \
+          \  lines.push(`| ${row.index} | ${row.part_no || \"-\"} | ${row.alias ||\
+          \ \"-\"} | ${row.status || \"-\"} | ${row.part_name || \"-\"} | ${[row.category1Name,\
+          \ row.category2Name].filter(Boolean).join(\" / \") || \"-\"} | ${row.model_years\
+          \ || \"-\"} | ${(row.specs || \"-\").replace(/\\|/g, \"\\\\|\")} |`);\n\
+          \  });\n\n  return {\n    success: true,\n    total_count: totalCounts,\n\
+          \    parts_json: JSON.stringify(filtered, null, 2),\n    result: lines.join(\"\
+          \\n\")\n  };\n}"
+        code_language: javascript
+        desc: Format ECAT part results.
+        outputs:
+          parts_json:
+            children: null
+            type: string
+          result:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+          total_count:
+            children: null
+            type: number
+        selected: false
+        title: 整理配件结果
+        type: code
+        variables:
+        - value_selector:
+          - part_api_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - normalize_input_node
+          - part_keyword
+          value_type: string
+          variable: part_keyword
+        - value_selector:
+          - match_category_node
+          - matched_category_text
+          value_type: string
+          variable: matched_category_text
+      height: 80
+      id: format_parts_node
+      position:
+        x: 2300
+        y: 260
+      positionAbsolute:
+        x: 2300
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_parts_node
+          - result
+          value_type: string
+          variable: result
+        selected: false
+        title: 结束
+        type: end
+      height: 88
+      id: end_node
+      position:
+        x: 2620
+        y: 260
+      positionAbsolute:
+        x: 2620
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -853.3000000000002
+      y: 121.69999999999999
+      zoom: 0.8
+  rag_pipeline_variables: []

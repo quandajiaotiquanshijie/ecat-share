@@ -1,0 +1,477 @@
+app:
+  description: 根据 Bosch 料号查询 ECAT 基础信息、产品分类和规格参数。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: ECAT - 料号基本信息参数查询 Workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start_node-source-normalize_part_no_node-target
+      source: start_node
+      sourceHandle: source
+      target: normalize_part_no_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: normalize_part_no_node-source-build_part_detail_url_node-target
+      source: normalize_part_no_node
+      sourceHandle: source
+      target: build_part_detail_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_part_detail_url_node-source-part_detail_api_node-target
+      source: build_part_detail_url_node
+      sourceHandle: source
+      target: part_detail_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: part_detail_api_node-source-format_part_detail_node-target
+      source: part_detail_api_node
+      sourceHandle: source
+      target: format_part_detail_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_part_detail_node-source-end_node-target
+      source: format_part_detail_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: part_no
+          max_length: 200
+          options: []
+          required: true
+          type: text-input
+          variable: part_no
+      height: 109
+      id: start_node
+      position:
+        x: 80
+        y: 240
+      positionAbsolute:
+        x: 80
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function main({ part_no }) {\n  const raw = String(part_no || \"\"\
+          ).trim().toUpperCase();\n  let normalized = raw.replace(/[^A-Z0-9]/g, \"\
+          \");\n\n  // Bosch 料号通常取 10 位；用户输入 13 位带后缀时，按旧流程取前 10 位。\n  if (normalized.length\
+          \ > 10) normalized = normalized.slice(0, 10);\n\n  const is_valid = /^[A-Z0-9]{6,10}$/.test(normalized);\n\
+          \n  return {\n    part_no: normalized,\n    is_valid,\n    validation_message:\
+          \ is_valid\n      ? \"Part number format is valid.\"\n      : \"请输入有效的 Bosch\
+          \ 料号，通常为 10 位数字/字母组合。\"\n  };\n}"
+        code_language: javascript
+        desc: Normalize Bosch part number.
+        outputs:
+          is_valid:
+            children: null
+            type: boolean
+          part_no:
+            children: null
+            type: string
+          validation_message:
+            children: null
+            type: string
+        selected: false
+        title: 标准化料号
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - part_no
+          value_type: string
+          variable: part_no
+      height: 80
+      id: normalize_part_no_node
+      position:
+        x: 420
+        y: 240
+      positionAbsolute:
+        x: 420
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "const crypto = require(\"crypto\");\n\nfunction encryptParam(data)\
+          \ {\n  const keyStr = \"8q7f15a4oc212ef3\";\n  const ivStr = \"8q7f15a4oc212ef3\"\
+          ;\n  const text = data === undefined || data === null ? \"\" : String(data);\n\
+          \  const cipher = crypto.createCipheriv(\"aes-128-cbc\", keyStr, ivStr);\n\
+          \  cipher.setAutoPadding(true);\n  let encrypted = cipher.update(text, \"\
+          utf8\", \"base64\");\n  encrypted += cipher.final(\"base64\");\n  return\
+          \ encodeURIComponent(encodeURIComponent(encrypted));\n}\n\nfunction main({\
+          \ part_no, is_valid, validation_message }) {\n  if (!is_valid) {\n    return\
+          \ {\n      success: false,\n      query_url: \"\",\n      reason: validation_message\n\
+          \    };\n  }\n\n  const baseUrl = \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/global/list\"\
+          ;\n  const queryUrl =\n    baseUrl +\n    \"?page=1\" +\n    \"&pageSize=20\"\
+          \ +\n    \"&partNo=\" + encryptParam(part_no) +\n    \"&languageType=\"\
+          \ + encryptParam(\"zh-cn\");\n\n  return {\n    success: true,\n    query_url:\
+          \ queryUrl,\n    reason: `构造料号详情查询 URL 成功：${part_no}`\n  };\n}"
+        code_language: javascript
+        desc: Build ECAT part detail query URL by partNo.
+        outputs:
+          query_url:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 构造料号详情查询URL
+        type: code
+        variables:
+        - value_selector:
+          - normalize_part_no_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - normalize_part_no_node
+          - is_valid
+          value_type: boolean
+          variable: is_valid
+        - value_selector:
+          - normalize_part_no_node
+          - validation_message
+          value_type: string
+          variable: validation_message
+      height: 96
+      id: build_part_detail_url_node
+      position:
+        x: 760
+        y: 240
+      positionAbsolute:
+        x: 760
+        y: 240
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT part global list API with partNo filter.
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 请求ECAT料号详情
+        type: http-request
+        url: '{{#build_part_detail_url_node.query_url#}}'
+        variables: []
+      height: 168
+      id: part_detail_api_node
+      position:
+        x: 1100
+        y: 240
+      positionAbsolute:
+        x: 1100
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction clean(v) {\n\
+          \  return String(v || \"\").trim();\n}\n\nfunction normalize(v) {\n  return\
+          \ clean(v).replace(/\\s+/g, \"\").toUpperCase();\n}\n\nfunction featurePairs(part)\
+          \ {\n  const features = Array.isArray(part.partFeatureValueList) ? part.partFeatureValueList\
+          \ : [];\n  return features.map(f => {\n    const name = clean(f.featureNameCn\
+          \ || f.featureName || f.featureNameEn || \"\");\n    const value = clean(f.featureValueString\
+          \ || f.featureValue || f.value || \"\");\n    return { name, value };\n\
+          \  }).filter(f => f.name || f.value);\n}\n\nfunction summarizeDimensions(features)\
+          \ {\n  const dimensionNames = [\n    \"长度\", \"宽度\", \"高度\", \"厚度\", \"\
+          直径\", \"外径\", \"内径\", \"孔径\",\n    \"螺纹\", \"重量\", \"容积\", \"电压\", \"功率\"\
+          , \"容量\"\n  ];\n  return features\n    .filter(f => dimensionNames.some(k\
+          \ => f.name.includes(k)))\n    .map(f => `${f.name}: ${f.value}`)\n    .join(\"\
+          ; \");\n}\n\nfunction pickBestPart(partList, targetPartNo) {\n  const target\
+          \ = normalize(targetPartNo);\n  return (\n    partList.find(p => normalize(p.partNo)\
+          \ === target) ||\n    partList.find(p => normalize(p.partNo).includes(target)\
+          \ || target.includes(normalize(p.partNo))) ||\n    partList[0] ||\n    null\n\
+          \  );\n}\n\nfunction main({ http_body, part_no, is_valid, validation_message\
+          \ }) {\n  if (!is_valid) {\n    return {\n      success: false,\n      part_no,\n\
+          \      name: \"\",\n      specs: \"\",\n      category: \"\",\n      dimensions:\
+          \ \"\",\n      notes: validation_message,\n      part_json: \"{}\",\n  \
+          \    result: validation_message\n    };\n  }\n\n  const data = safeJsonParse(http_body,\
+          \ {});\n  const resultData = data.resultData || {};\n  const partList =\
+          \ Array.isArray(resultData.partList) ? resultData.partList : [];\n  const\
+          \ totalCounts = resultData.totalCounts || resultData.pageInfo?.totalCounts\
+          \ || partList.length || 0;\n  const part = pickBestPart(partList, part_no);\n\
+          \n  if (!part) {\n    return {\n      success: false,\n      part_no,\n\
+          \      name: \"\",\n      specs: \"\",\n      category: \"\",\n      dimensions:\
+          \ \"\",\n      notes: `ECAT 未查询到料号 ${part_no} 的基础信息。`,\n      part_json:\
+          \ \"{}\",\n      result: `未查询到料号 ${part_no} 的基础信息，请检查料号是否正确。`\n    };\n\
+          \  }\n\n  const features = featurePairs(part);\n  const specs = features.map(f\
+          \ => `${f.name}: ${f.value}`).join(\"; \");\n  const dimensions = summarizeDimensions(features);\n\
+          \  const category = [part.category1Name, part.category2Name].map(clean).filter(Boolean).join(\"\
+          \ / \");\n  const notes = [\n    part.appDesCn || part.appDesEn || \"\"\
+          ,\n    part.typeFormular ? `别称/型号: ${part.typeFormular}` : \"\",\n    part.partNoStatus\
+          \ ? `状态: ${part.partNoStatus}` : \"\",\n    Array.isArray(part.carsModelYearList)\
+          \ && part.carsModelYearList.length\n      ? `适配年份: ${part.carsModelYearList.join(\"\
+          , \")}`\n      : \"\"\n  ].filter(Boolean).join(\"; \");\n\n  const detail\
+          \ = {\n    part_no: part.partNo || part_no,\n    name: part.partName ||\
+          \ \"\",\n    status: part.partNoStatus || \"\",\n    alias: part.typeFormular\
+          \ || \"\",\n    category,\n    category1Name: part.category1Name || \"\"\
+          ,\n    category2Name: part.category2Name || \"\",\n    dimensions,\n   \
+          \ specs,\n    notes,\n    total_count: totalCounts\n  };\n\n  const lines\
+          \ = [];\n  lines.push(`料号 ${detail.part_no} 查询完成。`);\n  lines.push(\"\"\
+          );\n  lines.push(\"| 字段 | 内容 |\");\n  lines.push(\"|---|---|\");\n  lines.push(`|\
+          \ 料号 | ${detail.part_no || \"-\"} |`);\n  lines.push(`| 名称 | ${detail.name\
+          \ || \"-\"} |`);\n  lines.push(`| 状态 | ${detail.status || \"-\"} |`);\n\
+          \  lines.push(`| 分类 | ${detail.category || \"-\"} |`);\n  lines.push(`|\
+          \ 尺寸/关键参数 | ${(detail.dimensions || \"-\").replace(/\\|/g, \"\\\\|\")} |`);\n\
+          \  lines.push(`| 全部规格参数 | ${(detail.specs || \"-\").replace(/\\|/g, \"\\\
+          \\|\")} |`);\n  lines.push(`| 备注 | ${(detail.notes || \"-\").replace(/\\\
+          |/g, \"\\\\|\")} |`);\n\n  return {\n    success: true,\n    part_no: detail.part_no,\n\
+          \    name: detail.name,\n    specs: detail.specs,\n    category: detail.category,\n\
+          \    dimensions: detail.dimensions,\n    notes: detail.notes,\n    part_json:\
+          \ JSON.stringify(detail, null, 2),\n    result: lines.join(\"\\n\")\n  };\n\
+          }"
+        code_language: javascript
+        desc: Format ECAT part detail result.
+        outputs:
+          category:
+            children: null
+            type: string
+          dimensions:
+            children: null
+            type: string
+          name:
+            children: null
+            type: string
+          notes:
+            children: null
+            type: string
+          part_json:
+            children: null
+            type: string
+          part_no:
+            children: null
+            type: string
+          result:
+            children: null
+            type: string
+          specs:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 整理料号详情结果
+        type: code
+        variables:
+        - value_selector:
+          - part_detail_api_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - normalize_part_no_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - normalize_part_no_node
+          - is_valid
+          value_type: boolean
+          variable: is_valid
+        - value_selector:
+          - normalize_part_no_node
+          - validation_message
+          value_type: string
+          variable: validation_message
+      height: 80
+      id: format_part_detail_node
+      position:
+        x: 1440
+        y: 240
+      positionAbsolute:
+        x: 1440
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_part_detail_node
+          - result
+          value_type: string
+          variable: result
+        - value_selector:
+          - format_part_detail_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - format_part_detail_node
+          - name
+          value_type: string
+          variable: name
+        - value_selector:
+          - format_part_detail_node
+          - specs
+          value_type: string
+          variable: specs
+        - value_selector:
+          - format_part_detail_node
+          - category
+          value_type: string
+          variable: category
+        - value_selector:
+          - format_part_detail_node
+          - dimensions
+          value_type: string
+          variable: dimensions
+        - value_selector:
+          - format_part_detail_node
+          - notes
+          value_type: string
+          variable: notes
+        - value_selector:
+          - format_part_detail_node
+          - part_json
+          value_type: string
+          variable: part_json
+        selected: false
+        title: 结束
+        type: end
+      height: 270
+      id: end_node
+      position:
+        x: 1780
+        y: 240
+      positionAbsolute:
+        x: 1780
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -32.299999999999955
+      y: 140.5
+      zoom: 0.8
+  rag_pipeline_variables: []

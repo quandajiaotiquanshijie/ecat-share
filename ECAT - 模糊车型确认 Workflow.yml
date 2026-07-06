@@ -1,0 +1,475 @@
+app:
+  description: 根据用户输入的模糊车型信息查询候选车型，输出候选列表供 Agent 追问用户选择。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: ECAT - 模糊车型确认 Workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: Supabase project URL for vehicle master data.
+    id: ecat-vehicle-supabase-url
+    name: ECAT_VEHICLE_SUPABASE_URL
+    selector:
+    - env
+    - ECAT_VEHICLE_SUPABASE_URL
+    value: https://sdmfcaryqtnyukafzhip.supabase.co
+    value_type: string
+  - description: Publishable Supabase API key used by the imported semantic search
+      flow.
+    id: ecat-vehicle-supabase-key
+    name: ECAT_VEHICLE_SUPABASE_KEY
+    selector:
+    - env
+    - ECAT_VEHICLE_SUPABASE_KEY
+    value: sb_publishable_Tg6-WGIm3dT92JDmpmF2bA_2bTXgD4e
+    value_type: string
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start_node-source-build_vehicle_url_node-target
+      source: start_node
+      sourceHandle: source
+      target: build_vehicle_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_vehicle_url_node-source-vehicle_query_node-target
+      source: build_vehicle_url_node
+      sourceHandle: source
+      target: vehicle_query_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: vehicle_query_node-source-format_candidates_node-target
+      source: vehicle_query_node
+      sourceHandle: source
+      target: format_candidates_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_candidates_node-source-end_node-target
+      source: format_candidates_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: 模糊车型信息
+          max_length: 1000
+          options: []
+          required: true
+          type: paragraph
+          variable: vehicle_search_text
+      height: 109
+      id: start_node
+      position:
+        x: 80
+        y: 260
+      positionAbsolute:
+        x: 80
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function cleanValue(v) {\n  return String(v || \"\").trim();\n}\n\n\
+          function enc(v) {\n  return encodeURIComponent(cleanValue(v));\n}\n\nfunction\
+          \ normalizeSearchText(text) {\n  let s = cleanValue(text);\n  s = s.replace(/([\\\
+          u4e00-\\u9fa5])([A-Za-z0-9])/g, \"$1 $2\");\n  s = s.replace(/([A-Za-z0-9])([\\\
+          u4e00-\\u9fa5])/g, \"$1 $2\");\n\n  // 车型确认 workflow 只负责找车，先去掉明显的配件/动作词。\n\
+          \  s = s.replace(/刹车片|前片|后片|前刹|后刹|制动片|火花塞|点火线圈|点火包|雨刮器|雨刮|雨刷|机滤|空滤|空调滤|机油|配件|适配|查询|有没有|帮我找|推荐/g,\
+          \ \" \");\n  s = s.replace(/[，,。;；、/\\\\|()[\\]【】{}<>《》:：\\-—_+]/g, \" \"\
+          );\n  s = s.replace(/\\s+/g, \" \").trim();\n  return s;\n}\n\nfunction\
+          \ extractVehicleSearchTerms(vehicleSearchText) {\n  const normalized = normalizeSearchText(vehicleSearchText);\n\
+          \  const rawTerms = normalized.match(/[\\u4e00-\\u9fa5A-Za-z0-9·.]+/g) ||\
+          \ [];\n  const terms = [];\n\n  rawTerms.forEach(term => {\n    const t\
+          \ = cleanValue(term);\n    if (t.length < 2) return;\n    if (/^[.]+$/.test(t))\
+          \ return;\n    terms.push(t);\n  });\n\n  return Array.from(new Set(terms)).slice(0,\
+          \ 12);\n}\n\nfunction norm(v) {\n  return String(v || \"\").trim().replace(/\\\
+          s+/g, \"\").toLowerCase();\n}\n\nfunction isSoftTrimCode(term) {\n  return\
+          \ /^[A-Za-z]\\d$/i.test(cleanValue(term));\n}\n\nfunction isWeakConfigTerm(term)\
+          \ {\n  const t = norm(term);\n  return /^(自动|手动|手自一体|四驱|两驱|汽油|柴油|智逸|智雅|智远|豪华版|运动版|时尚版|旗舰版|舒适版|尊贵版|精英版|领先版|改款)$/.test(t);\n\
+          }\n\nfunction isDisplacementTerm(term) {\n  return /^\\d+(\\.\\d+)?t?$/i.test(cleanValue(term));\n\
+          }\n\nfunction queryTermsFromTerms(terms) {\n  return terms.filter(term =>\
+          \ {\n    if (isSoftTrimCode(term)) return false;\n    if (isWeakConfigTerm(term))\
+          \ return false;\n    return true;\n  });\n}\n\nfunction main({ vehicle_search_text\
+          \ }) {\n  const base = \"https://sdmfcaryqtnyukafzhip.supabase.co/rest/v1/vehicle_master\"\
+          ;\n  const select = [\n    \"car_id\",\n    \"brand_id\",\n    \"model_id\"\
+          ,\n    \"manufacturer\",\n    \"car_full_info\",\n    \"brand_name\",\n\
+          \    \"model_class\",\n    \"car_name\",\n    \"model_name\",\n    \"model_year\"\
+          ,\n    \"produced_year\",\n    \"discontinued_year\",\n    \"displacement\"\
+          ,\n    \"inlet_form\",\n    \"fuel_type\",\n    \"engine_code\",\n    \"\
+          chassis_code\",\n    \"katashiki\",\n    \"grade\",\n    \"vehicle_type\"\
+          \n  ].join(\",\");\n\n  const terms = extractVehicleSearchTerms(vehicle_search_text);\n\
+          \  const queryTerms = queryTermsFromTerms(terms);\n  const params = [];\n\
+          \  params.push(\"select=\" + encodeURIComponent(select));\n  params.push(\"\
+          limit=80\");\n  params.push(\"order=model_year.desc\");\n\n  if (queryTerms.length\
+          \ > 0) {\n    const filters = queryTerms.map(term => `car_full_info.ilike.*${enc(term)}*`);\n\
+          \    params.push(\"and=(\" + filters.join(\",\") + \")\");\n  }\n\n  return\
+          \ {\n    query_url: base + \"?\" + params.join(\"&\"),\n    vehicle_search_terms:\
+          \ terms,\n    normalized_vehicle_query: normalizeSearchText(vehicle_search_text)\n\
+          \  };\n}"
+        code_language: javascript
+        desc: Build Supabase vehicle_master fuzzy-search URL.
+        outputs:
+          normalized_vehicle_query:
+            children: null
+            type: string
+          query_url:
+            children: null
+            type: string
+          vehicle_search_terms:
+            children: null
+            type: array[string]
+        selected: true
+        title: 构造车型查询URL
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - vehicle_search_text
+          value_type: string
+          variable: vehicle_search_text
+      height: 96
+      id: build_vehicle_url_node
+      position:
+        x: 381.25
+        y: 260
+      positionAbsolute:
+        x: 381.25
+        y: 260
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Query vehicle_master from the existing semantic-search data source.
+        headers: 'apikey:{{#env.ECAT_VEHICLE_SUPABASE_KEY#}}
+
+          Authorization:Bearer {{#env.ECAT_VEHICLE_SUPABASE_KEY#}}
+
+          Content-Type:application/json'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 查询车型主数据
+        type: http-request
+        url: '{{#build_vehicle_url_node.query_url#}}'
+        variables: []
+      height: 184
+      id: vehicle_query_node
+      position:
+        x: 700
+        y: 260
+      positionAbsolute:
+        x: 700
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction text(v) {\n \
+          \ return String(v || \"\").trim();\n}\n\nfunction norm(v) {\n  return text(v).replace(/\\\
+          s+/g, \"\").toLowerCase();\n}\n\nfunction escapeRegExp(v) {\n  return text(v).replace(/[.*+?^${}()|[\\\
+          ]\\\\]/g, \"\\\\$&\");\n}\n\nfunction isYearTerm(term) {\n  const t = text(term);\n\
+          \  return /^(19|20)\\d{2}$/.test(t);\n}\n\nfunction isDisplacementTerm(term)\
+          \ {\n  return /^\\d+(\\.\\d+)?t?$/i.test(text(term));\n}\n\nfunction normalizeDisplacement(term)\
+          \ {\n  const m = text(term).match(/^(\\d+(?:\\.\\d+)?)/);\n  if (!m) return\
+          \ \"\";\n  const n = Number(m[1]);\n  if (!Number.isFinite(n)) return \"\
+          \";\n  return String(n).replace(/\\.0$/, \"\");\n}\n\nfunction isSoftTrimCode(term)\
+          \ {\n  return /^[A-Za-z]\\d$/i.test(text(term));\n}\n\nfunction trimCodeConflict(inputCode,\
+          \ info) {\n  const code = text(inputCode).toUpperCase();\n  const letter\
+          \ = code.slice(0, 1);\n  const digit = code.slice(1);\n  const re = new\
+          \ RegExp(\"(^|[^A-Z0-9])\" + letter + \"(\\\\d)([^A-Z0-9]|$)\", \"i\");\n\
+          \  const m = text(info).toUpperCase().match(re);\n  return Boolean(m &&\
+          \ m[2] && m[2] !== digit);\n}\n\nfunction isWeakConfigTerm(term) {\n  const\
+          \ t = norm(term);\n  return /^(自动|手动|手自一体|四驱|两驱|汽油|柴油|智逸|智雅|智远|豪华版|运动版|时尚版|旗舰版|舒适版|尊贵版|精英版|领先版|改款)$/.test(t);\n\
+          }\n\nfunction isEngineLike(term) {\n  const t = text(term);\n  return /^[A-Za-z0-9]{5,}$/.test(t)\
+          \ && /[A-Za-z]/.test(t) && /\\d/.test(t);\n}\n\nfunction isGenericNumber(term)\
+          \ {\n  const t = text(term);\n  return /^\\d+$/.test(t) && !isYearTerm(t);\n\
+          }\n\nfunction queryTermsFromTerms(terms) {\n  return terms.filter(term =>\
+          \ {\n    if (isSoftTrimCode(term)) return false;\n    if (isWeakConfigTerm(term))\
+          \ return false;\n    if (isGenericNumber(term)) return false;\n    return\
+          \ true;\n  });\n}\n\nfunction includesNorm(haystack, needle) {\n  const\
+          \ h = norm(haystack);\n  const n = norm(needle);\n  return Boolean(n &&\
+          \ h.includes(n));\n}\n\nfunction exactCodeInInfo(code, info) {\n  const\
+          \ re = new RegExp(\"(^|[^A-Za-z0-9])\" + escapeRegExp(code) + \"([^A-Za-z0-9]|$)\"\
+          , \"i\");\n  return re.test(text(info));\n}\n\nfunction candidateInfo(row)\
+          \ {\n  return [\n    row.car_full_info || row.carFullInfo || \"\",\n   \
+          \ row.brand_name || row.brandName || \"\",\n    row.manufacturer || \"\"\
+          ,\n    row.model_class || row.modelClass || \"\",\n    row.car_name || row.carName\
+          \ || \"\",\n    row.model_name || row.modelName || \"\",\n    row.model_year\
+          \ || row.modelYear || \"\",\n    row.displacement || \"\",\n    row.inlet_form\
+          \ || row.inletForm || \"\",\n    row.fuel_type || row.fuelType || \"\",\n\
+          \    row.engine_code || row.engineCode || \"\",\n    row.chassis_code ||\
+          \ row.chassisCode || \"\",\n    row.grade || \"\",\n    row.vehicle_type\
+          \ || row.vehicleType || \"\"\n  ].join(\" \");\n}\n\nfunction scoreCandidate(row,\
+          \ terms, normalizedQuery) {\n  const info = candidateInfo(row);\n  const\
+          \ fullInfo = row.car_full_info || row.carFullInfo || \"\";\n  const brandText\
+          \ = [row.brand_name || row.brandName || \"\", row.manufacturer || \"\"].join(\"\
+          \ \");\n  const modelText = [row.model_class || row.modelClass || \"\",\
+          \ row.model_name || row.modelName || \"\", row.car_name || row.carName ||\
+          \ \"\"].join(\" \");\n  const modelYear = text(row.model_year || row.modelYear\
+          \ || \"\");\n  const displacement = text(row.displacement || \"\");\n  const\
+          \ engine = text(row.engine_code || row.engineCode || \"\");\n\n  let score\
+          \ = 0;\n  const reasons = [];\n  const penalties = [];\n\n  if (normalizedQuery\
+          \ && includesNorm(fullInfo, normalizedQuery)) {\n    score += 20;\n    reasons.push(\"\
+          完整描述命中+20\");\n  }\n\n  terms.forEach(term => {\n    const t = text(term);\n\
+          \    if (!t) return;\n\n    if (isYearTerm(t)) {\n      if (modelYear ===\
+          \ t || includesNorm(info, t)) {\n        score += 35;\n        reasons.push(`${t}年款+35`);\n\
+          \      } else {\n        score -= 30;\n        penalties.push(`${t}年款不一致-30`);\n\
+          \      }\n      return;\n    }\n\n    if (isEngineLike(t)) {\n      if (includesNorm(engine,\
+          \ t) || includesNorm(info, t)) {\n        score += 30;\n        reasons.push(`${t}发动机/代码+30`);\n\
+          \      } else {\n        score -= 12;\n        penalties.push(`${t}代码未命中-12`);\n\
+          \      }\n      return;\n    }\n\n    if (isDisplacementTerm(t)) {\n   \
+          \   const inputDisp = normalizeDisplacement(t);\n      const rowDisp = normalizeDisplacement(displacement);\n\
+          \      if ((inputDisp && rowDisp && inputDisp === rowDisp) || includesNorm(info,\
+          \ t)) {\n        score += 15;\n        reasons.push(`${t}排量+15`);\n    \
+          \  } else {\n        score -= 10;\n        penalties.push(`${t}排量不一致-10`);\n\
+          \      }\n      return;\n    }\n\n    if (isSoftTrimCode(t)) {\n      if\
+          \ (exactCodeInInfo(t, info)) {\n        score += 12;\n        reasons.push(`${t}配置码+12`);\n\
+          \      } else if (trimCodeConflict(t, info)) {\n        score -= 8;\n  \
+          \      penalties.push(`${t}配置码冲突-8`);\n      }\n      return;\n    }\n\n\
+          \    if (isWeakConfigTerm(t)) {\n      if (includesNorm(info, t)) {\n  \
+          \      score += 5;\n        reasons.push(`${t}配置词+5`);\n      }\n      return;\n\
+          \    }\n\n    if (includesNorm(brandText, t)) {\n      score += 40;\n  \
+          \    reasons.push(`${t}品牌/厂商+40`);\n    } else if (includesNorm(modelText,\
+          \ t)) {\n      score += 35;\n      reasons.push(`${t}车系/车型+35`);\n    }\
+          \ else if (includesNorm(info, t)) {\n      score += 20;\n      reasons.push(`${t}车型文本+20`);\n\
+          \    } else {\n      score -= 60;\n      penalties.push(`${t}关键车型词未命中-60`);\n\
+          \    }\n  });\n\n  return { score, reasons, penalties };\n}\n\nfunction\
+          \ yearNumber(row) {\n  const y = Number(row.model_year || row.modelYear\
+          \ || 0);\n  return Number.isFinite(y) ? y : 0;\n}\n\nfunction main({ http_body,\
+          \ vehicle_search_terms, normalized_vehicle_query }) {\n  const rowsRaw =\
+          \ safeJsonParse(http_body, []);\n  const rows = Array.isArray(rowsRaw) ?\
+          \ rowsRaw : [];\n  const terms = Array.isArray(vehicle_search_terms) ? vehicle_search_terms.filter(Boolean)\
+          \ : [];\n  const hardTerms = queryTermsFromTerms(terms);\n\n  if (terms.length\
+          \ === 0) {\n    return {\n      success: false,\n      match_count: 0,\n\
+          \      candidates_json: \"[]\",\n      top_car_id: \"\",\n      top_car_full_info:\
+          \ \"\",\n      result: \"没有识别到有效车型关键词，请补充品牌、车系、年款、排量、发动机或配置。\"\n    };\n\
+          \  }\n\n  if (hardTerms.length === 0) {\n    return {\n      success: false,\n\
+          \      match_count: 0,\n      candidates_json: \"[]\",\n      top_car_id:\
+          \ \"\",\n      top_car_full_info: \"\",\n      result: \"当前输入只有配置/弱描述，无法稳定确认车型。请至少补充品牌、车系、年款、排量或发动机之一。\"\
+          \n    };\n  }\n\n  if (!rows.length) {\n    return {\n      success: false,\n\
+          \      match_count: 0,\n      candidates_json: \"[]\",\n      top_car_id:\
+          \ \"\",\n      top_car_full_info: \"\",\n      result: `没有匹配到车型：${normalized_vehicle_query}。请补充品牌、车系、年款、排量、发动机，或减少不确定描述后重试。`\n\
+          \    };\n  }\n\n  // 二次防跑偏：硬查询词必须仍然出现在车辆描述中；T5/手自一体等只负责排序。\n  const filteredRows\
+          \ = rows.filter(row => {\n    const info = candidateInfo(row);\n    return\
+          \ hardTerms.every(term => includesNorm(info, term));\n  });\n\n  if (!filteredRows.length)\
+          \ {\n    return {\n      success: false,\n      match_count: 0,\n      candidates_json:\
+          \ \"[]\",\n      top_car_id: \"\",\n      top_car_full_info: \"\",\n   \
+          \   result:\n        `查询到了 ${rows.length} 条宽泛结果，但没有结果同时命中关键车型词：${hardTerms.join(\"\
+          、\")}。\\n` +\n        \"请补充更准确的品牌、车系、年款、发动机，或减少不确定配置词后重试。\"\n    };\n  }\n\
+          \n  const scoredRows = filteredRows.map(row => {\n    const scored = scoreCandidate(row,\
+          \ terms, normalized_vehicle_query);\n    return { row, score: scored.score,\
+          \ reasons: scored.reasons, penalties: scored.penalties };\n  }).sort((a,\
+          \ b) => {\n    if (b.score !== a.score) return b.score - a.score;\n    return\
+          \ yearNumber(b.row) - yearNumber(a.row);\n  });\n\n  const candidates =\
+          \ scoredRows.slice(0, 10).map((item, index) => {\n    const r = item.row;\n\
+          \    return {\n      index: index + 1,\n      match_score: item.score,\n\
+          \      match_reasons: item.reasons.slice(0, 6),\n      match_penalties:\
+          \ item.penalties.slice(0, 4),\n      car_id: r.car_id || r.carId || \"\"\
+          ,\n      brand_id: r.brand_id || r.brandId || \"\",\n      model_id: r.model_id\
+          \ || r.modelId || \"\",\n      car_full_info: r.car_full_info || r.carFullInfo\
+          \ || \"\",\n      brand_name: r.brand_name || r.brandName || \"\",\n   \
+          \   manufacturer: r.manufacturer || \"\",\n      model_class: r.model_class\
+          \ || r.modelClass || \"\",\n      car_name: r.car_name || r.carName || \"\
+          \",\n      model_name: r.model_name || r.modelName || \"\",\n      model_year:\
+          \ r.model_year || r.modelYear || \"\",\n      displacement: r.displacement\
+          \ || \"\",\n      inlet_form: r.inlet_form || r.inletForm || \"\",\n   \
+          \   fuel_type: r.fuel_type || r.fuelType || \"\",\n      engine_code: r.engine_code\
+          \ || r.engineCode || \"\",\n      chassis_code: r.chassis_code || r.chassisCode\
+          \ || \"\",\n      vehicle_type: r.vehicle_type || r.vehicleType || \"\"\n\
+          \    };\n  });\n\n  const lines = [];\n  lines.push(`车型候选查询完成，共匹配 ${filteredRows.length}\
+          \ 条，已按匹配分排序，展示前 ${candidates.length} 条。`);\n  lines.push(\"\");\n  lines.push(\"\
+          | 序号 | 匹配分 | car_id | 车型信息 | 年款 | 排量 | 发动机 |\");\n  lines.push(\"|---:|---:|---|---|---|---|---|\"\
+          );\n  candidates.forEach(c => {\n    lines.push(`| ${c.index} | ${c.match_score}\
+          \ | ${c.car_id || \"-\"} | ${c.car_full_info || \"-\"} | ${c.model_year\
+          \ || \"-\"} | ${c.displacement || \"-\"} | ${c.engine_code || \"-\"} |`);\n\
+          \  });\n\n  return {\n    success: true,\n    match_count: filteredRows.length,\n\
+          \    candidates_json: JSON.stringify(candidates, null, 2),\n    top_car_id:\
+          \ candidates[0]?.car_id || \"\",\n    top_car_full_info: candidates[0]?.car_full_info\
+          \ || \"\",\n    result: lines.join(\"\\n\")\n  };\n}"
+        code_language: javascript
+        desc: Format candidates for Agent selection.
+        outputs:
+          candidates_json:
+            children: null
+            type: string
+          match_count:
+            children: null
+            type: number
+          result:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+          top_car_full_info:
+            children: null
+            type: string
+          top_car_id:
+            children: null
+            type: string
+        selected: false
+        title: 格式化候选车型
+        type: code
+        variables:
+        - value_selector:
+          - vehicle_query_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - build_vehicle_url_node
+          - vehicle_search_terms
+          value_type: array[string]
+          variable: vehicle_search_terms
+        - value_selector:
+          - build_vehicle_url_node
+          - normalized_vehicle_query
+          value_type: string
+          variable: normalized_vehicle_query
+      height: 96
+      id: format_candidates_node
+      position:
+        x: 1020
+        y: 260
+      positionAbsolute:
+        x: 1020
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_candidates_node
+          - result
+          value_type: string
+          variable: result
+        selected: false
+        title: 结束
+        type: end
+      height: 88
+      id: end_node
+      position:
+        x: 1340
+        y: 260
+      positionAbsolute:
+        x: 1340
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -474.29999999999984
+      y: 113.29999999999995
+      zoom: 0.8
+  rag_pipeline_variables: []

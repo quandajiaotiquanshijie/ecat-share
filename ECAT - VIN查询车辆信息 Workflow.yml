@@ -1,0 +1,372 @@
+app:
+  description: 根据 17 位 VIN 调用 ECAT 生产查询接口，返回车辆上下文、carIds 和 levelIds。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: ECAT - VIN查询车辆信息 Workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start_node-source-normalize_vin_node-target
+      source: start_node
+      sourceHandle: source
+      target: normalize_vin_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: normalize_vin_node-source-vin_api_node-target
+      source: normalize_vin_node
+      sourceHandle: source
+      target: vin_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: vin_api_node-source-format_vehicle_node-target
+      source: vin_api_node
+      sourceHandle: source
+      target: format_vehicle_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_vehicle_node-source-end_node-target
+      source: format_vehicle_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: VIN码
+          max_length: 80
+          options: []
+          required: true
+          type: text-input
+          variable: vin_code
+      height: 109
+      id: start_node
+      position:
+        x: 80
+        y: 260
+      positionAbsolute:
+        x: 80
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function main({ vin_code }) {\n  const raw = String(vin_code || \"\"\
+          ).trim().toUpperCase();\n  const vin = raw.replace(/[^A-HJ-NPR-Z0-9]/g,\
+          \ \"\");\n  const is_valid = /^[A-HJ-NPR-Z0-9]{17}$/.test(vin);\n\n  return\
+          \ {\n    vin,\n    is_valid,\n    validation_message: is_valid\n      ?\
+          \ \"VIN format is valid.\"\n      : \"VIN must be 17 characters and cannot\
+          \ contain I/O/Q.\"\n  };\n}"
+        code_language: javascript
+        desc: Normalize and validate the VIN before calling ECAT.
+        outputs:
+          is_valid:
+            children: null
+            type: boolean
+          validation_message:
+            children: null
+            type: string
+          vin:
+            children: null
+            type: string
+        selected: false
+        title: 校验VIN
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - vin_code
+          value_type: string
+          variable: vin_code
+      height: 96
+      id: normalize_vin_node
+      position:
+        x: 380
+        y: 260
+      positionAbsolute:
+        x: 380
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT production VIN lookup API.
+        headers: 'Content-Type:application/json
+
+          Accept:application/json'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 调用ECAT VIN接口
+        type: http-request
+        url: https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/car/query-vinCode?vinCode={{#normalize_vin_node.vin#}}&languageType=zh-cn
+        variables: []
+      height: 232
+      id: vin_api_node
+      position:
+        x: 700
+        y: 260
+      positionAbsolute:
+        x: 700
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction main({ vin, is_valid,\
+          \ validation_message, http_body }) {\n  if (!is_valid) {\n    return {\n\
+          \      success: false,\n      vin,\n      car_ids: \"\",\n      level_ids:\
+          \ \"\",\n      vehicle_count: 0,\n      vehicle_json: \"[]\",\n      result:\
+          \ validation_message\n    };\n  }\n\n  const data = safeJsonParse(http_body,\
+          \ {});\n  const resultData = data.resultData || {};\n  const carInfoList\
+          \ = Array.isArray(resultData.carInfoList) ? resultData.carInfoList : [];\n\
+          \  const carIds = resultData.carIds || carInfoList.map(item => item.carId).filter(Boolean).join(\"\
+          ,\");\n  const levelIds = resultData.levelIds || \"\";\n\n  const vehicles\
+          \ = carInfoList.map((item, index) => ({\n    index: index + 1,\n    vin,\n\
+          \    car_id: item.carId || item.car_id || \"\",\n    level_id: item.levelId\
+          \ || item.level_id || \"\",\n    brand_id: item.brandId || item.brand_id\
+          \ || \"\",\n    brand_name: item.brandName || item.brand_name || \"\",\n\
+          \    manufacturer: item.manufacturer || \"\",\n    model_class: item.modelClass\
+          \ || item.model_class || \"\",\n    model_name: item.modelName || item.model_name\
+          \ || \"\",\n    model_year: item.modelYear || item.model_year || \"\",\n\
+          \    displacement: item.displacement || \"\",\n    engine_code: item.engineCode\
+          \ || item.engine_code || \"\",\n    car_full_info:\n      item.carFullInfo\
+          \ ||\n      item.car_full_info ||\n      [\n        item.brandName || \"\
+          \",\n        item.modelClass || \"\",\n        item.modelName || \"\",\n\
+          \        item.modelYear || \"\",\n        item.displacement || \"\",\n \
+          \       item.engineCode || \"\"\n      ].filter(Boolean).join(\" \")\n \
+          \ }));\n\n  if (!vehicles.length && !carIds) {\n    return {\n      success:\
+          \ false,\n      vin,\n      car_ids: \"\",\n      level_ids: \"\",\n   \
+          \   vehicle_count: 0,\n      vehicle_json: \"[]\",\n      result: `VIN ${vin}\
+          \ 未查询到车辆信息。`\n    };\n  }\n\n  const lines = [];\n  lines.push(`VIN ${vin}\
+          \ 查询完成。`);\n  lines.push(\"\");\n  lines.push(\"| 序号 | car_id | 车型信息 | 年款\
+          \ | 排量 | 发动机 |\");\n  lines.push(\"|---:|---|---|---|---|---|\");\n  vehicles.slice(0,\
+          \ 10).forEach(v => {\n    lines.push(`| ${v.index} | ${v.car_id || \"-\"\
+          } | ${v.car_full_info || \"-\"} | ${v.model_year || \"-\"} | ${v.displacement\
+          \ || \"-\"} | ${v.engine_code || \"-\"} |`);\n  });\n  if (!vehicles.length)\
+          \ {\n    lines.push(`| 1 | ${carIds || \"-\"} | ECAT 返回 carIds，但未返回 carInfoList\
+          \ | - | - | - |`);\n  }\n\n  return {\n    success: true,\n    vin,\n  \
+          \  car_ids: carIds,\n    level_ids: levelIds,\n    vehicle_count: vehicles.length,\n\
+          \    vehicle_json: JSON.stringify(vehicles, null, 2),\n    result: lines.join(\"\
+          \\n\")\n  };\n}"
+        code_language: javascript
+        desc: Format ECAT vehicle response for Agent tool use.
+        outputs:
+          car_ids:
+            children: null
+            type: string
+          level_ids:
+            children: null
+            type: string
+          result:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+          vehicle_count:
+            children: null
+            type: number
+          vehicle_json:
+            children: null
+            type: string
+          vin:
+            children: null
+            type: string
+        selected: false
+        title: 整理车辆信息
+        type: code
+        variables:
+        - value_selector:
+          - normalize_vin_node
+          - vin
+          value_type: string
+          variable: vin
+        - value_selector:
+          - normalize_vin_node
+          - is_valid
+          value_type: boolean
+          variable: is_valid
+        - value_selector:
+          - normalize_vin_node
+          - validation_message
+          value_type: string
+          variable: validation_message
+        - value_selector:
+          - vin_api_node
+          - body
+          value_type: string
+          variable: http_body
+      height: 96
+      id: format_vehicle_node
+      position:
+        x: 1020
+        y: 260
+      positionAbsolute:
+        x: 1020
+        y: 260
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_vehicle_node
+          - result
+          value_type: string
+          variable: result
+        - value_selector:
+          - format_vehicle_node
+          - success
+          value_type: boolean
+          variable: success
+        - value_selector:
+          - format_vehicle_node
+          - vin
+          value_type: string
+          variable: vin
+        - value_selector:
+          - format_vehicle_node
+          - car_ids
+          value_type: string
+          variable: car_ids
+        - value_selector:
+          - format_vehicle_node
+          - level_ids
+          value_type: string
+          variable: level_ids
+        - value_selector:
+          - format_vehicle_node
+          - vehicle_json
+          value_type: string
+          variable: vehicle_json
+        selected: false
+        title: 结束
+        type: end
+      height: 218
+      id: end_node
+      position:
+        x: 1340
+        y: 260
+      positionAbsolute:
+        x: 1340
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -6.299999999999841
+      y: 52.299999999999955
+      zoom: 0.8
+  rag_pipeline_variables: []

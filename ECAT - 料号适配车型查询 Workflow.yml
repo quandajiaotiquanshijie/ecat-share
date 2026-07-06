@@ -1,0 +1,591 @@
+app:
+  description: 根据 Bosch 料号反查 ECAT 适配车型列表。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: ECAT - 料号适配车型查询 Workflow
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start_node-source-build_part_lookup_url_node-target
+      source: start_node
+      sourceHandle: source
+      target: build_part_lookup_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_part_lookup_url_node-source-part_lookup_api_node-target
+      source: build_part_lookup_url_node
+      sourceHandle: source
+      target: part_lookup_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: part_lookup_api_node-source-extract_part_node-target
+      source: part_lookup_api_node
+      sourceHandle: source
+      target: extract_part_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: extract_part_node-source-build_fitment_url_node-target
+      source: extract_part_node
+      sourceHandle: source
+      target: build_fitment_url_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_fitment_url_node-source-fitment_vehicles_api_node-target
+      source: build_fitment_url_node
+      sourceHandle: source
+      target: fitment_vehicles_api_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: fitment_vehicles_api_node-source-format_fitment_vehicles_node-target
+      source: fitment_vehicles_api_node
+      sourceHandle: source
+      target: format_fitment_vehicles_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_fitment_vehicles_node-source-end_node-target
+      source: format_fitment_vehicles_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: part_no
+          max_length: 200
+          options: []
+          required: true
+          type: text-input
+          variable: part_no
+      height: 109
+      id: start_node
+      position:
+        x: 80
+        y: 240
+      positionAbsolute:
+        x: 80
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "const crypto = require(\"crypto\");\n\nfunction encryptParam(data)\
+          \ {\n  const keyStr = \"8q7f15a4oc212ef3\";\n  const ivStr = \"8q7f15a4oc212ef3\"\
+          ;\n  const text = data === undefined || data === null ? \"\" : String(data);\n\
+          \  const cipher = crypto.createCipheriv(\"aes-128-cbc\", keyStr, ivStr);\n\
+          \  cipher.setAutoPadding(true);\n  let encrypted = cipher.update(text, \"\
+          utf8\", \"base64\");\n  encrypted += cipher.final(\"base64\");\n  return\
+          \ encodeURIComponent(encodeURIComponent(encrypted));\n}\n\nfunction normalizePartNo(value)\
+          \ {\n  let partNo = String(value || \"\").trim().toUpperCase().replace(/[^A-Z0-9]/g,\
+          \ \"\");\n  if (partNo.length > 10) partNo = partNo.slice(0, 10);\n  return\
+          \ partNo;\n}\n\nfunction main({ part_no }) {\n  const partNo = normalizePartNo(part_no);\n\
+          \  const isValid = /^[A-Z0-9]{6,10}$/.test(partNo);\n  const queryPartNo\
+          \ = isValid ? partNo : \"__INVALID__\";\n  const queryUrl =\n    \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/global/list\"\
+          \ +\n    \"?page=1\" +\n    \"&pageSize=20\" +\n    \"&partNo=\" + encryptParam(queryPartNo)\
+          \ +\n    \"&languageType=\" + encryptParam(\"zh-cn\");\n\n  return {\n \
+          \   part_no: partNo,\n    is_valid: isValid,\n    validation_message: isValid\
+          \ ? \"Part number format is valid.\" : \"请输入有效 Bosch 料号。\",\n    query_url:\
+          \ queryUrl\n  };\n}"
+        code_language: javascript
+        desc: Normalize part_no and build ECAT part lookup URL.
+        outputs:
+          is_valid:
+            children: null
+            type: boolean
+          part_no:
+            children: null
+            type: string
+          query_url:
+            children: null
+            type: string
+          validation_message:
+            children: null
+            type: string
+        selected: false
+        title: 标准化料号并构造查询
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - part_no
+          value_type: string
+          variable: part_no
+      height: 96
+      id: build_part_lookup_url_node
+      position:
+        x: 420
+        y: 240
+      positionAbsolute:
+        x: 420
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT part list by partNo to get partId.
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 查询料号partId
+        type: http-request
+        url: '{{#build_part_lookup_url_node.query_url#}}'
+        variables: []
+      height: 168
+      id: part_lookup_api_node
+      position:
+        x: 760
+        y: 240
+      positionAbsolute:
+        x: 760
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction normalize(v)\
+          \ {\n  return String(v || \"\").trim().replace(/\\s+/g, \"\").toUpperCase();\n\
+          }\n\nfunction main({ http_body, part_no, is_valid, validation_message })\
+          \ {\n  if (!is_valid) {\n    return {\n      success: false,\n      part_id:\
+          \ \"\",\n      part_no,\n      part_name: \"\",\n      status: \"\",\n \
+          \     category: \"\",\n      reason: validation_message\n    };\n  }\n\n\
+          \  const data = safeJsonParse(http_body, {});\n  const partList = data?.resultData?.partList\
+          \ || [];\n  const target = normalize(part_no);\n  const part = partList.find(p\
+          \ => normalize(p.partNo) === target) || partList[0] || null;\n\n  if (!part\
+          \ || !part.partId) {\n    return {\n      success: false,\n      part_id:\
+          \ \"\",\n      part_no,\n      part_name: \"\",\n      status: \"\",\n \
+          \     category: \"\",\n      reason: `ECAT 未查询到料号 ${part_no} 对应的 partId。`\n\
+          \    };\n  }\n\n  return {\n    success: true,\n    part_id: String(part.partId\
+          \ || \"\"),\n    part_no: part.partNo || part_no,\n    part_name: part.partName\
+          \ || \"\",\n    status: part.partNoStatus || \"\",\n    category: [part.category1Name,\
+          \ part.category2Name].filter(Boolean).join(\" / \"),\n    reason: `已解析料号\
+          \ ${part.partNo || part_no} 的 partId=${part.partId}`\n  };\n}"
+        code_language: javascript
+        desc: Extract partId from ECAT part result.
+        outputs:
+          category:
+            children: null
+            type: string
+          part_id:
+            children: null
+            type: string
+          part_name:
+            children: null
+            type: string
+          part_no:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          status:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 提取partId
+        type: code
+        variables:
+        - value_selector:
+          - part_lookup_api_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - build_part_lookup_url_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - build_part_lookup_url_node
+          - is_valid
+          value_type: boolean
+          variable: is_valid
+        - value_selector:
+          - build_part_lookup_url_node
+          - validation_message
+          value_type: string
+          variable: validation_message
+      height: 80
+      id: extract_part_node
+      position:
+        x: 1100
+        y: 240
+      positionAbsolute:
+        x: 1100
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "const crypto = require(\"crypto\");\n\nfunction encryptParam(data)\
+          \ {\n  const keyStr = \"8q7f15a4oc212ef3\";\n  const ivStr = \"8q7f15a4oc212ef3\"\
+          ;\n  const text = data === undefined || data === null ? \"\" : String(data);\n\
+          \  const cipher = crypto.createCipheriv(\"aes-128-cbc\", keyStr, ivStr);\n\
+          \  cipher.setAutoPadding(true);\n  let encrypted = cipher.update(text, \"\
+          utf8\", \"base64\");\n  encrypted += cipher.final(\"base64\");\n  return\
+          \ encodeURIComponent(encodeURIComponent(encrypted));\n}\n\nfunction main({\
+          \ part_id, success, reason }) {\n  if (!success || !part_id) {\n    return\
+          \ {\n      success: false,\n      query_url:\n        \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/car/query?page=1&pageSize=1&partId=\"\
+          \ +\n        encryptParam(\"__INVALID__\") +\n        \"&languageType=\"\
+          \ + encryptParam(\"zh-cn\"),\n      reason\n    };\n  }\n\n  const queryUrl\
+          \ =\n    \"https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/car/query\"\
+          \ +\n    \"?page=1\" +\n    \"&pageSize=200\" +\n    \"&partId=\" + encryptParam(part_id)\
+          \ +\n    \"&languageType=\" + encryptParam(\"zh-cn\");\n\n  return { success:\
+          \ true, query_url: queryUrl, reason: `构造适配车型查询 URL 成功：partId=${part_id}`\
+          \ };\n}"
+        code_language: javascript
+        desc: Build ECAT car/query URL by partId.
+        outputs:
+          query_url:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 构造适配车型查询URL
+        type: code
+        variables:
+        - value_selector:
+          - extract_part_node
+          - part_id
+          value_type: string
+          variable: part_id
+        - value_selector:
+          - extract_part_node
+          - success
+          value_type: boolean
+          variable: success
+        - value_selector:
+          - extract_part_node
+          - reason
+          value_type: string
+          variable: reason
+      height: 80
+      id: build_fitment_url_node
+      position:
+        x: 1440
+        y: 240
+      positionAbsolute:
+        x: 1440
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: Call ECAT car/query by partId.
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 查询适配车型
+        type: http-request
+        url: '{{#build_fitment_url_node.query_url#}}'
+        variables: []
+      height: 152
+      id: fitment_vehicles_api_node
+      position:
+        x: 1780
+        y: 240
+      positionAbsolute:
+        x: 1780
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function safeJsonParse(value, fallback) {\n  if (!value) return fallback;\n\
+          \  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n\
+          \  } catch (e) {\n    return fallback;\n  }\n}\n\nfunction yearRange(row)\
+          \ {\n  const start = row.producedYear || row.modelYear || \"\";\n  const\
+          \ end = row.discontinuedYear || row.shutdownYear || row.modelYear || \"\"\
+          ;\n  if (start && end && start !== end) return `${start}-${end}`;\n  return\
+          \ start || end || \"\";\n}\n\nfunction main({ http_body, part_success, part_no,\
+          \ part_name, part_id, part_reason }) {\n  if (!part_success) {\n    return\
+          \ {\n      success: false,\n      part_no,\n      vehicle_count: 0,\n  \
+          \    vehicles_json: \"[]\",\n      result: part_reason\n    };\n  }\n\n\
+          \  const data = safeJsonParse(http_body, {});\n  const resultData = data.resultData\
+          \ || {};\n  const carInfoList = Array.isArray(resultData.carInfoList) ?\
+          \ resultData.carInfoList : [];\n  const total = resultData.pageInfo?.totalCounts\
+          \ || resultData.totalCounts || carInfoList.length;\n  const vehicles = carInfoList.map((row,\
+          \ index) => ({\n    index: index + 1,\n    car_id: row.carId || \"\",\n\
+          \    display_name: row.carFullInfo || \"\",\n    year_range: yearRange(row),\n\
+          \    model_year: row.modelYear || \"\",\n    engine: row.engineCode || \"\
+          \",\n    displacement: row.displacement || \"\",\n    manufacturer: row.manufacturer\
+          \ || \"\",\n    model_class: row.modelClass || \"\",\n    driving_form:\
+          \ row.drivingForm || \"\",\n    fuel_type: row.fuelType || \"\",\n    app_description:\
+          \ Array.isArray(row.appDesList) ? row.appDesList.join(\", \") : \"\"\n \
+          \ }));\n\n  if (!vehicles.length) {\n    return {\n      success: false,\n\
+          \      part_no,\n      vehicle_count: 0,\n      vehicles_json: \"[]\",\n\
+          \      result: `料号 ${part_no} 未查询到适配车型。`\n    };\n  }\n\n  const lines =\
+          \ [];\n  lines.push(`料号 ${part_no}（${part_name || \"-\"}）适配车型查询完成。ECAT 共返回\
+          \ ${total} 条，当前展示 ${vehicles.length} 条。`);\n  lines.push(\"\");\n  lines.push(\"\
+          | 序号 | car_id | 车型信息 | 年款/生产年 | 发动机 | 排量 |\");\n  lines.push(\"|---:|---|---|---|---|---|\"\
+          );\n  vehicles.forEach(v => {\n    lines.push(`| ${v.index} | ${v.car_id\
+          \ || \"-\"} | ${v.display_name || \"-\"} | ${v.year_range || v.model_year\
+          \ || \"-\"} | ${v.engine || \"-\"} | ${v.displacement || \"-\"} |`);\n \
+          \ });\n  if (total > vehicles.length) {\n    lines.push(\"\");\n    lines.push(`注：当前\
+          \ workflow 默认展示前 ${vehicles.length} 条；ECAT 总数为 ${total} 条。`);\n  }\n\n \
+          \ return {\n    success: true,\n    part_no,\n    vehicle_count: total,\n\
+          \    vehicles_json: JSON.stringify(vehicles, null, 2),\n    result: lines.join(\"\
+          \\n\")\n  };\n}"
+        code_language: javascript
+        desc: Format fitment vehicle list.
+        outputs:
+          part_no:
+            children: null
+            type: string
+          result:
+            children: null
+            type: string
+          success:
+            children: null
+            type: boolean
+          vehicle_count:
+            children: null
+            type: number
+          vehicles_json:
+            children: null
+            type: string
+        selected: false
+        title: 整理适配车型结果
+        type: code
+        variables:
+        - value_selector:
+          - fitment_vehicles_api_node
+          - body
+          value_type: string
+          variable: http_body
+        - value_selector:
+          - extract_part_node
+          - success
+          value_type: boolean
+          variable: part_success
+        - value_selector:
+          - extract_part_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - extract_part_node
+          - part_name
+          value_type: string
+          variable: part_name
+        - value_selector:
+          - extract_part_node
+          - part_id
+          value_type: string
+          variable: part_id
+        - value_selector:
+          - extract_part_node
+          - reason
+          value_type: string
+          variable: part_reason
+      height: 80
+      id: format_fitment_vehicles_node
+      position:
+        x: 2120
+        y: 240
+      positionAbsolute:
+        x: 2120
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_fitment_vehicles_node
+          - result
+          value_type: string
+          variable: result
+        - value_selector:
+          - format_fitment_vehicles_node
+          - part_no
+          value_type: string
+          variable: part_no
+        - value_selector:
+          - format_fitment_vehicles_node
+          - vehicle_count
+          value_type: number
+          variable: vehicle_count
+        - value_selector:
+          - format_fitment_vehicles_node
+          - vehicles_json
+          value_type: string
+          variable: vehicles_json
+        selected: false
+        title: 结束
+        type: end
+      height: 166
+      id: end_node
+      position:
+        x: 2460
+        y: 240
+      positionAbsolute:
+        x: 2460
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -1629.3
+      y: 117.10000000000002
+      zoom: 0.8
+  rag_pipeline_variables: []

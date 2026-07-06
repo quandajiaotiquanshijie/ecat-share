@@ -1,0 +1,1433 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: ECAT Chatflow 优化版
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: genai-ap/llm-farm-china:1.8.0@e306ef71f7dc3ebb60a570764782429d2c60da2a6ecd18d2ede9bae33c3d3322
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables:
+  - description: ''
+    id: e5db0588-b7aa-4e3c-bd85-285026c5bd02
+    name: VIN_CODE
+    selector:
+    - conversation
+    - VIN_CODE
+    value: ''
+    value_type: string
+  - description: ''
+    id: fa14b07a-913e-4a3b-9f3b-463adbb5ed16
+    name: carId
+    selector:
+    - conversation
+    - carId
+    value: ''
+    value_type: string
+  - description: ''
+    id: f90880a0-db31-48eb-b2dd-10ae9ad5699d
+    name: last_content
+    selector:
+    - conversation
+    - last_content
+    value: []
+    value_type: array[object]
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 250
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 5
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: 你好，我是你的博世智能出行订购平台小助手，很高兴见到你...
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: true
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: iteration
+      id: 1770348017384-source-1770358254083-target
+      selected: false
+      source: '1770348017384'
+      sourceHandle: source
+      target: '1770358254083'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: iteration-start
+        targetType: variable-aggregator
+      id: 1770358254083start-source-1770358287187-target
+      selected: false
+      source: 1770358254083start
+      sourceHandle: source
+      target: '1770358287187'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: variable-aggregator
+        targetType: http-request
+      id: 1770358287187-source-1770358294981-target
+      selected: false
+      source: '1770358287187'
+      sourceHandle: source
+      target: '1770358294981'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1770283188360-source-1770364835327-target
+      selected: false
+      source: '1770283188360'
+      sourceHandle: source
+      target: '1770364835327'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1770364835327-true-1770365011547-target
+      selected: false
+      source: '1770364835327'
+      sourceHandle: 'true'
+      target: '1770365011547'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1770364835327-false-1770348017384-target
+      selected: false
+      source: '1770364835327'
+      sourceHandle: 'false'
+      target: '1770348017384'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: http-request
+        targetType: code
+      id: 1770368277882-source-1770368304796-target
+      selected: false
+      source: '1770368277882'
+      sourceHandle: source
+      target: '1770368304796'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: code
+        targetType: code
+      id: 1770368304796-source-1770368312527-target
+      selected: false
+      source: '1770368304796'
+      sourceHandle: source
+      target: '1770368312527'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: code
+        targetType: http-request
+      id: 1770368312527-source-1770368318973-target
+      selected: false
+      source: '1770368312527'
+      sourceHandle: source
+      target: '1770368318973'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: http-request
+        targetType: code
+      id: 1770368318973-source-1770368328022-target
+      selected: false
+      source: '1770368318973'
+      sourceHandle: source
+      target: '1770368328022'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1770604754686-true-1770365128374-target
+      selected: false
+      source: '1770604754686'
+      sourceHandle: 'true'
+      target: '1770365128374'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: http-request
+        targetType: code
+      id: 1770358294981-source-1770607798379-target
+      selected: false
+      source: '1770358294981'
+      sourceHandle: source
+      target: '1770607798379'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        sourceType: code
+        targetType: http-request
+      id: 1770607798379-source-1770368277882-target
+      selected: false
+      source: '1770607798379'
+      sourceHandle: source
+      target: '1770368277882'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1770614245453-source-1770604754686-target
+      selected: false
+      source: '1770614245453'
+      sourceHandle: source
+      target: '1770604754686'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: iteration
+        targetType: code
+      id: 1770358254083-source-1770614245453-target
+      selected: false
+      source: '1770358254083'
+      sourceHandle: source
+      target: '1770614245453'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: 1770348017384-source-1770620839432-target
+      selected: false
+      source: '1770348017384'
+      sourceHandle: source
+      target: '1770620839432'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1770604754686-false-1770627810173-target
+      selected: false
+      source: '1770604754686'
+      sourceHandle: 'false'
+      target: '1770627810173'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: 1770627810173-source-1770627851282-target
+      selected: false
+      source: '1770627810173'
+      sourceHandle: source
+      target: '1770627851282'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1770712266338-source-1770712371391-target
+      selected: false
+      source: '1770712266338'
+      sourceHandle: source
+      target: '1770712371391'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1770712371391-false-1770712381162-target
+      selected: false
+      source: '1770712371391'
+      sourceHandle: 'false'
+      target: '1770712381162'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1770712371391-true-1770712473247-target
+      selected: false
+      source: '1770712371391'
+      sourceHandle: 'true'
+      target: '1770712473247'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1750814568977-source-1770283188360-target
+      selected: false
+      source: '1750814568977'
+      sourceHandle: source
+      target: '1770283188360'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables: []
+      height: 73
+      id: '1750814568977'
+      position:
+        x: 896.4426695122638
+        y: 4.901872017814185
+      positionAbsolute:
+        x: 896.4426695122638
+        y: 4.901872017814185
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - sys
+          - query
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwenPlus
+          provider: genai-ap/llm-farm-china/llm-farm-china
+        prompt_template:
+        - id: e558f822-607f-4f04-8f64-9039eb97de3f
+          role: system
+          text: "# Role\n你是一个高效的汽车数据解析专家，专门负责从复杂的混合文本中精准分离“用户查询需求”与“17位车辆识别码（VIN）”。\n\
+            \n# Task\n请从用户提供的文本中识别并提取以下两类信息：\n1. **user_goal（用户需求）**：提取用户提到的具体产品名称、系列、功能描述（例如：“风翼雨刮”、“只要在售的”、“帮我找暴风系列”）。如果用户没提需求，请输出“全部”。\n\
+            2. **vin_list（VIN 列表）**：扫描所有字符序列，仅提取符合以下硬性规则的 17 位 VIN：\n   - 长度：精确等于\
+            \ 17 位。\n   - 字符：仅限数字和大写字母，且不含 I、O、Q。\n\n# Constraint (极其重要)\n- **提取逻辑**：即使\
+            \ VIN 码分布在文字描述中间，也要逐一识别并剔除周围的干扰符号。\n- **输出格式**：为了方便后续程序处理，请**务必**以 JSON\
+            \ 格式输出结果，不要包含任何多余的解释文字。\n- **拒绝策略**：如果序列不满足 17 位，或者包含了禁止字符（I, O, Q），请直接将其视为“非法干扰信息”并予以忽略。\n\
+            - **禁止猜测**：不要尝试补齐位数，不要尝试修正字符，不要提取相似但位长不足的号码。\n\n# Workflow\n1. 第一步：定位文本中可能的字母数字序列。\n\
+            2. 第二步：数一下序列的长度。如果不是 17 位，立即放弃。\n3. 第三步：检查是否有 I、O、Q。如果有，立即放弃。\n4. 第四步：输出最终合法的\
+            \ VIN。\n\n# Output Format (JSON)\n{\n  \"user_goal\": \"提取到的需求描述\",\n\
+            \  \"vin_list\": [\"VIN1\", \"VIN2\", \"VIN3\"]\n}\n\n# Example\n输入：\"\
+            帮我查询以下车型的风翼雨刮：LZWADAGA6HB114112 以及 LE40B8EBXML682421\"\n输出：\n{\n  \"user_goal\"\
+            : \"风翼雨刮\",\n  \"vin_list\": [\"LZWADAGA6HB114112\", \"LE40B8EBXML682421\"\
+            ]\n}\n"
+        - id: 799b10e4-55e9-44cd-95c7-d7d1300b129a
+          role: user
+          text: 内容：请提取以下文本中的所有VIN码：{{#sys.query#}}
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            properties:
+              vin_list:
+                items:
+                  type: string
+                type: array
+            required:
+            - vin_list
+            type: object
+        structured_output_enabled: false
+        title: 批量识别用户VIN码LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 118
+      id: '1770283188360'
+      position:
+        x: 1259.4792399945902
+        y: -40.90474523395967
+      positionAbsolute:
+        x: 1259.4792399945902
+        y: -40.90474523395967
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\nimport re\n\ndef main(llm_output: str):\n    vin_array\
+          \ = []\n    user_requirement = \"\"\n\n    try:\n        # 1. 尝试解析 JSON\n\
+          \        clean_json_match = re.search(r'(\\{.*\\})', llm_output, re.DOTALL)\n\
+          \        if clean_json_match:\n            data = json.loads(clean_json_match.group(1))\n\
+          \            vin_array = data.get(\"vin_list\", [])\n            user_requirement\
+          \ = data.get(\"user_goal\", \"\").strip()\n        \n        # 2. 如果 JSON\
+          \ 解析失败，使用正则兜底提取 VIN\n        if not vin_array:\n            vin_array =\
+          \ re.findall(r'[A-HJ-NPR-Z0-9]{17}', llm_output)\n\n        # 3. 智能判定：用户到底有没有“真正的”个性化需求\n\
+          \        # 如果 user_requirement 为空，或者长度太短，或者包含常见的客套废话\n        stop_words\
+          \ = [\"全部\", \"查询\", \"一下\", \"请帮我\", \"结果\", \"VIN\", \"列表\", \"车型\", \"\
+          如下\"]\n        \n        # 清洗掉干扰字符后的纯净需求文本\n        pure_goal = re.sub(r'[#`*解析输出：\\\
+          s\\n\\[\\]{}:：]', '', user_requirement)\n        \n        # 判断逻辑：\n   \
+          \     # 如果纯净需求为空，或者长度小于 2 个字，或者需求里全是客套话\n        is_meaningless = not pure_goal\
+          \ or len(pure_goal) < 2 or all(word in pure_goal for word in [\"查询\", \"\
+          结果\"])\n        \n        if is_meaningless:\n            # 这种情况下，给 LLM\
+          \ 发送“全量展示”指令\n            final_goal = \"全量展示，不要过滤任何行\"\n        else:\n\
+          \            final_goal = pure_goal\n\n        return {\n            \"\
+          vin_list\": vin_array,\n            \"user_goal\": final_goal\n        }\n\
+          \        \n    except Exception as e:\n        return {\n            \"\
+          vin_list\": re.findall(r'[A-HJ-NPR-Z0-9]{17}', llm_output),\n          \
+          \  \"user_goal\": \"全量展示\"\n        }"
+        code_language: python3
+        outputs:
+          user_goal:
+            children: null
+            type: string
+          vin_list:
+            children: null
+            type: array[string]
+        selected: false
+        title: 提取干净的vinlist
+        type: code
+        variables:
+        - value_selector:
+          - '1770283188360'
+          - text
+          value_type: string
+          variable: llm_output
+      height: 52
+      id: '1770348017384'
+      position:
+        x: 1727.3447004330242
+        y: 222.66694391300058
+      positionAbsolute:
+        x: 1727.3447004330242
+        y: 222.66694391300058
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        error_handle_mode: continue-on-error
+        flatten_output: true
+        height: 325
+        is_parallel: false
+        iterator_input_type: array[string]
+        iterator_selector:
+        - '1770348017384'
+        - vin_list
+        output_selector:
+        - '1770368328022'
+        - markdown_table
+        output_type: array[string]
+        parallel_nums: 10
+        selected: false
+        start_node_id: 1770358254083start
+        title: Iteration 迭代节点
+        type: iteration
+        width: 2740
+      height: 325
+      id: '1770358254083'
+      position:
+        x: 939.1833775121358
+        y: 733.5251733148743
+      positionAbsolute:
+        x: 939.1833775121358
+        y: 733.5251733148743
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 2740
+      zIndex: 1
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      draggable: false
+      height: 48
+      id: 1770358254083start
+      parentId: '1770358254083'
+      position:
+        x: 60
+        y: 139
+      positionAbsolute:
+        x: 999.1833775121358
+        y: 872.5251733148743
+      selectable: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        output_type: array[string]
+        selected: false
+        title: Variable Aggregator 2
+        type: variable-aggregator
+        variables:
+        - - '1770358254083'
+          - item
+      height: 108
+      id: '1770358287187'
+      parentId: '1770358254083'
+      position:
+        x: 184
+        y: 109
+      positionAbsolute:
+        x: 1123.1833775121358
+        y: 842.5251733148743
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        headers: Content-Type:application/json
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 获取vin的carid和levelid
+        type: http-request
+        url: https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/car/query-vinCode?vinCode={{#1770358254083.item#}}&languageType=zh-cn
+        variables: []
+      height: 205
+      id: '1770358294981'
+      parentId: '1770358254083'
+      position:
+        x: 487.15653515926806
+        y: 91.66528043499704
+      positionAbsolute:
+        x: 1426.339912671404
+        y: 825.1904537498714
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: 66f62272-64e1-4c8b-ac40-bbeccaf85c8b
+            value: '[]'
+            varType: string
+            variable_selector:
+            - '1770283188360'
+            - text
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 判断vin码是否存在
+        type: if-else
+      height: 124
+      id: '1770364835327'
+      position:
+        x: 1564.2073813384065
+        y: -40.90474523395967
+      positionAbsolute:
+        x: 1564.2073813384065
+        y: -40.90474523395967
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: 抱歉，我无法从您提供的内容中识别出有效的 17 位 VIN 码。请检查输入是否正确，例如：LMGJC3S81N1008863
+        selected: false
+        title: 直接回复
+        type: answer
+        variables: []
+      height: 148
+      id: '1770365011547'
+      position:
+        x: 1946
+        y: 0
+      positionAbsolute:
+        x: 1946
+        y: 0
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: 已识别到 VIN 码，但在数据库中未找到对应的“在售”配件。这可能是因为该车型数据尚未同步或配件已停产。
+        selected: false
+        title: 回复有VIN码但是提取不到产品
+        type: answer
+        variables: []
+      height: 132
+      id: '1770365128374'
+      position:
+        x: 5852
+        y: 191
+      positionAbsolute:
+        x: 5852
+        y: 191
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: key-value-342
+            key: ''
+            type: text
+            value: "\n{\n  \"carIds\": \"{{#1770607798379.final_car_ids#}}\",\n  \"\
+              levelIds\": \"{{#1770607798379.final_level_ids#}}\",\n  \"languageType\"\
+              : \"zh-cn\",\n  \"isSelectAll\": \"0\"\n}"
+          type: json
+        headers: 'Accept:application/json
+
+          Content-Type:application/json'
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 获取每个VIN码对应的产品组
+        type: http-request
+        url: https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/category/global/getCategoryByCarList
+        variables: []
+      height: 170
+      id: '1770368277882'
+      parentId: '1770358254083'
+      position:
+        x: 1171.332224347998
+        y: 119.00083173900168
+      positionAbsolute:
+        x: 2110.5156018601338
+        y: 852.526005053876
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        code: "import json\n\ndef main(api_response: str):\n    try:\n        # 1.\
+          \ 解析 JSON 数据\n        if isinstance(api_response, str):\n            data\
+          \ = json.loads(api_response)\n        else:\n            data = api_response\n\
+          \n        # 处理可能存在的双重序列化\n        if isinstance(data, str):\n          \
+          \  data = json.loads(data)\n\n        # 2. 定位到目标数据源\n        result_data\
+          \ = data.get('resultData', {})\n        raw_list = result_data.get('categoryListForCar',\
+          \ [])\n        \n        if not raw_list:\n            return {\n      \
+          \          \"category2_list_str\": \"\",\n                \"category2_array\"\
+          : []\n            }\n\n        # 3. 仅提取 category2Name\n        valid_c2_names\
+          \ = []\n        for item in raw_list:\n            c2 = item.get('category2Name')\n\
+          \            if c2:\n                valid_c2_names.append(c2)\n       \
+          \ \n        # 4. 去重并排序\n        unique_c2 = sorted(list(set(valid_c2_names)))\n\
+          \n        # 5. 返回结果\n        return {\n            # 格式： \"前刹车片,后刹车片,空调滤清器(单效)\"\
+          \n            \"category2_list_str\": \",\".join(unique_c2), \n        \
+          \    # 格式： [\"前刹车片\", \"后刹车片\", ...]\n            \"category2_array\": unique_c2\
+          \ \n        }\n        \n    except Exception as e:\n        return {\n\
+          \            \"category2_list_str\": f\"Error: {str(e)}\",\n           \
+          \ \"category2_array\": []\n        }"
+        code_language: python3
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        outputs:
+          category2_array:
+            children: null
+            type: array[string]
+          category2_list_str:
+            children: null
+            type: string
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: '提取有效的产品组 '
+        type: code
+        variables:
+        - value_selector:
+          - '1770368277882'
+          - body
+          value_type: string
+          variable: api_response
+      height: 82
+      id: '1770368304796'
+      parentId: '1770358254083'
+      position:
+        x: 1485.3326402174985
+        y: 161.66985499950658
+      positionAbsolute:
+        x: 2424.5160177296343
+        y: 895.1950283143809
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        code: "const crypto = require('crypto');\r\n\r\nfunction main({ categories,\
+          \ carIdsString }) {\r\n    const keyStr = '8q7f15a4oc212ef3';\r\n    const\
+          \ ivStr = '8q7f15a4oc212ef3';\r\n\r\n    function normalize(val) {\r\n \
+          \       if (Array.isArray(val)) return val.join(',');\r\n        if (val\
+          \ === undefined || val === null) return '';\r\n        return String(val);\r\
+          \n    }\r\n\r\n    function aesEncrypt(data) {\r\n        const text = normalize(data);\r\
+          \n        const cipher = crypto.createCipheriv('aes-128-cbc', keyStr, ivStr);\r\
+          \n        cipher.setAutoPadding(true);\r\n        let encrypted = cipher.update(text,\
+          \ 'utf8', 'base64');\r\n        encrypted += cipher.final('base64');\r\n\
+          \r\n        // 【修正点】：只保留一级 encode\r\n        // Dify 的 HTTP 节点 Params 表格会自动把\
+          \ % 变成 %25\r\n        // 这样发出去的请求正好是博世要求的二级转码格式\r\n        return encodeURIComponent(encrypted);\r\
+          \n    }\r\n\r\n    // 针对已经加密好的固定字符串，也只做一级转码\r\n    function fixEncode(str)\
+          \ {\r\n        return encodeURIComponent(str);\r\n    }\r\n\r\n    return\
+          \ {\r\n        enc_categories: aesEncrypt(categories),\r\n        enc_carIds:\
+          \ aesEncrypt(carIdsString),\r\n        enc_partNo: aesEncrypt(''),\r\n \
+          \       enc_isEffectiveMapping: aesEncrypt('1'),\r\n        enc_partOnSale:\
+          \ aesEncrypt(''),\r\n        enc_languageType: aesEncrypt('zh-cn'), // 建议检查此处原始值是否为数字\
+          \ 3 或字符串 'zh-cn'\r\n        enc_levelIds: fixEncode('S7KtD73tWxTqR0IVCN43GEPbFyYecXzO5MJh/9zll30KEo0lOR5AGutlilCr/8N9')\r\
+          \n    };\r\n}"
+        code_language: javascript
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        outputs:
+          enc_carIds:
+            children: null
+            type: string
+          enc_categories:
+            children: null
+            type: string
+          enc_isEffectiveMapping:
+            children: null
+            type: string
+          enc_languageType:
+            children: null
+            type: string
+          enc_levelIds:
+            children: null
+            type: string
+          enc_partNo:
+            children: null
+            type: string
+          enc_partOnSale:
+            children: null
+            type: string
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: 加密carid和levelid
+        type: code
+        variables:
+        - value_selector:
+          - '1770368304796'
+          - category2_list_str
+          value_type: string
+          variable: categories
+        - value_selector:
+          - '1770607798379'
+          - final_car_ids
+          value_type: string
+          variable: carIdsString
+      height: 82
+      id: '1770368312527'
+      parentId: '1770358254083'
+      position:
+        x: 1765.5570342026704
+        y: 90.89050615917017
+      positionAbsolute:
+        x: 2704.740411714806
+        y: 824.4156794740445
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        headers: 'Referer:https://boschaftermarket.com.cn/Dealerportal/gb/cn/parts
+
+          User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+          (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        method: get
+        params: 'page:1
+
+          pageSize:500
+
+          languageType:{{#1770368312527.enc_languageType#}}
+
+          carIds:{{#1770368312527.enc_carIds#}}
+
+          category2Names:{{#1770368312527.enc_categories#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 访问产品URL
+        type: http-request
+        url: https://boschaftermarket.com.cn/ecat_backend/ecat-service/api/part/global/list
+        variables: []
+      height: 154
+      id: '1770368318973'
+      parentId: '1770358254083'
+      position:
+        x: 2116
+        y: 86
+      positionAbsolute:
+        x: 3055.183377512136
+        y: 819.5251733148743
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        code: "import json\n\ndef main(http_response: str, current_vin: str):\n  \
+          \  # 1. 前置防御：检查输入是否为空或无效\n    if not http_response or http_response == \"\
+          null\":\n        return {\n            \"markdown_table\": f\"[COUNT:0]###\
+          \ \U0001F697 车辆 VIN: {current_vin}\\n⚠️ 接口请求失败或返回空数据，请检查网络或 VIN 码有效性。\\\
+          n\\n\"\n        }\n\n    try:\n        # 2. 安全解析 JSON\n        if isinstance(http_response,\
+          \ str):\n            try:\n                data = json.loads(http_response)\n\
+          \            except json.JSONDecodeError:\n                # 如果返回的不是标准 JSON，记录错误并跳过\n\
+          \                return {\"markdown_table\": f\"[COUNT:0]### \U0001F697\
+          \ 车辆 VIN: {current_vin}\\n⚠️ 接口数据格式异常，无法解析。\\n\\n\"}\n        else:\n  \
+          \          data = http_response\n            \n        result_data = data.get(\"\
+          resultData\") or {}\n        part_list = result_data.get(\"partList\") or\
+          \ []\n        \n        # 预定义表头\n        header = \"| VIN 码 | 别称 | 物料号 |\
+          \ 状态 | 产品名称 | 二级名称 | 年份 | 尺寸 | 备注 |\\n\"\n        sep = \"| :--- | :---\
+          \ | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\\n\"\n        rows\
+          \ = []\n\n        for item in part_list:\n            # --- 过滤逻辑：只保留包含“雨刮”的产品\
+          \ ---\n            product_name = item.get(\"partName\") or \"\"\n     \
+          \       sub_category = item.get(\"category2Name\") or \"\"\n           \
+          \ \n            if \"雨刮\" not in product_name and \"雨刮\" not in sub_category:\n\
+          \                continue\n\n            # 基础信息提取\n            alias = item.get(\"\
+          typeFormular\") or \"-\"\n            part_no = item.get(\"partNo\") or\
+          \ \"-\"\n            status = item.get(\"partNoStatus\") or \"-\"\n    \
+          \        \n            # 状态图标美化（不删除文字，仅增加符号）\n            display_status\
+          \ = f\"✅ {status}\" if status == \"在售\" else f\"❌ {status}\" if status ==\
+          \ \"停产\" else status\n            \n            # 提取年份\n            year_list\
+          \ = item.get(\"carsModelYearList\")\n            year_str = \" / \".join(sorted(list(set(map(str,\
+          \ year_list))))) if year_list else \"-\"\n\n            # 提取尺寸/特征\n    \
+          \        features = item.get(\"partFeatureValueList\") or []\n         \
+          \   feature_parts = [f\"{f.get('featureNameCn')}:{f.get('featureValueString')}\"\
+          \ \n                             for f in features if f.get('featureValueString')\
+          \ not in [\"否\", \"无\", \"\"]]\n            size_str = \"<br>\".join(feature_parts)\
+          \ if feature_parts else \"-\"\n            \n            # 提取备注\n      \
+          \      remark = item.get(\"appDesEn\") or item.get(\"specInfo\") or \"-\"\
+          \n\n            # 组装行（保持移除反引号的状态）\n            rows.append(f\"| {current_vin}\
+          \ | {alias} | {part_no} | {display_status} | {product_name} | {sub_category}\
+          \ | {year_str} | {size_str} | {remark} |\")\n\n        # 重新计算过滤后的数量\n  \
+          \      filtered_count = len(rows)\n\n        if rows:\n            result\
+          \ = f\"[COUNT:{filtered_count}]### \U0001F697 车辆 VIN: {current_vin} (匹配雨刮类产品:\
+          \ {filtered_count}件)\\n\" + header + sep + \"\\n\".join(rows) + \"\\n\\\
+          n\"\n        else:\n            result = f\"[COUNT:0]### \U0001F697 车辆 VIN:\
+          \ {current_vin}\\n⚠️ 该车辆未查询到匹配的雨刮类备件。\\n\\n\"\n\n        return {\n    \
+          \        \"markdown_table\": result\n        }\n        \n    except Exception\
+          \ as e:\n        # 3. 终极兜底：任何代码执行错误都会被捕捉并转化为 Markdown 提示，避免节点崩溃\n      \
+          \  return {\n            \"markdown_table\": f\"[COUNT:0]### \U0001F697\
+          \ 车辆 VIN: {current_vin}\\n❌ 解析过程发生致命错误: {str(e)}\\n\\n\"\n        }"
+        code_language: python3
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        outputs:
+          markdown_table:
+            children: null
+            type: string
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: 获取当前表格内容
+        type: code
+        variables:
+        - value_selector:
+          - '1770368318973'
+          - body
+          value_type: string
+          variable: http_response
+        - value_selector:
+          - '1770358254083'
+          - item
+          value_type: string
+          variable: current_vin
+      height: 82
+      id: '1770368328022'
+      parentId: '1770358254083'
+      position:
+        x: 2438
+        y: 122
+      positionAbsolute:
+        x: 3377.183377512136
+        y: 855.5251733148743
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: empty
+            id: b8e6f149-879d-4ce3-837c-df817e26f166
+            value: '[ ]'
+            varType: string
+            variable_selector:
+            - '1770614245453'
+            - final_report
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 判断是否有产品
+        type: if-else
+      height: 124
+      id: '1770604754686'
+      position:
+        x: 5490
+        y: 183
+      positionAbsolute:
+        x: 5490
+        y: 183
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(response_body: str, current_vin: str):\n  \
+          \  try:\n        if isinstance(response_body, str):\n            data =\
+          \ json.loads(response_body)\n        else:\n            data = response_body\n\
+          \        \n        result_data = data.get('resultData', {})\n\n        #\
+          \ 提取当前 VIN 对应的 carIds\n        car_ids_str = result_data.get('carIds', \"\
+          \")\n        level_ids_str = result_data.get('levelIds', \"\")\n\n     \
+          \   if not car_ids_str:\n            car_info_list = result_data.get('carInfoList',\
+          \ [])\n            ids = [str(item.get('carId')) for item in car_info_list\
+          \ if item.get('carId')]\n            car_ids_str = \",\".join(ids)\n   \
+          \     \n        return {\n            \"vin\": current_vin, # 将 VIN 传递下去\n\
+          \            \"final_car_ids\": car_ids_str,\n            \"final_level_ids\"\
+          : level_ids_str\n        }\n    except Exception as e:\n        return {\n\
+          \            \"vin\": current_vin,\n            \"final_car_ids\": \"\"\
+          ,\n            \"final_level_ids\": \"\",\n            \"error\": str(e)\n\
+          \        }"
+        code_language: python3
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770358254083'
+        outputs:
+          final_car_ids:
+            children: null
+            type: string
+          final_level_ids:
+            children: null
+            type: string
+          vin:
+            children: null
+            type: string
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: 当前VIN提取
+        type: code
+        variables:
+        - value_selector:
+          - '1770358294981'
+          - body
+          value_type: string
+          variable: response_body
+        - value_selector:
+          - '1770358254083'
+          - item
+          value_type: string
+          variable: current_vin
+      height: 82
+      id: '1770607798379'
+      parentId: '1770358254083'
+      position:
+        x: 828
+        y: 122
+      positionAbsolute:
+        x: 1767.1833775121358
+        y: 855.5251733148743
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        code: "import re\n\ndef main(table_array: list):\n    \"\"\"\n    table_array:\
+          \ 迭代节点输出的 Array[String]\n    \"\"\"\n    if not table_array:\n        return\
+          \ {\"final_report\": \"⚠️ 未接收到任何查询数据。\"}\n\n    total_parts = 0\n    clean_tables\
+          \ = []\n    summary_rows = []\n    query_count = 0\n\n    for item in table_array:\n\
+          \        if item is None or not isinstance(item, str):\n            continue\n\
+          \        \n        query_count += 1\n        \n        # 1. 提取数量标记 [COUNT:X]\n\
+          \        count_match = re.search(r'\\[COUNT:(\\d+)\\]', item)\n        count\
+          \ = 0\n        if count_match:\n            count = int(count_match.group(1))\n\
+          \            total_parts += count\n            # 移除标记\n            item\
+          \ = item.replace(count_match.group(0), \"\")\n            \n        # 2.\
+          \ 【核心修复】：精准匹配标题中的 VIN 码\n        # 匹配格式为：车辆 VIN: (17位字符)\n        vin_match\
+          \ = re.search(r'车辆 VIN:\\s*([A-HJ-NPR-Z0-9]{17})', item)\n        \n   \
+          \     # 如果正则没匹配到，尝试通用匹配（匹配标题冒号后的内容）\n        if not vin_match:\n       \
+          \     vin_match = re.search(r'车辆 VIN:\\s*(\\w+)', item)\n            \n\
+          \        vin = vin_match.group(1) if vin_match else \"未知车辆\"\n        \n\
+          \        summary_rows.append(f\"| {vin} | **{count}** |\")\n        clean_tables.append(item)\n\
+          \n    # 3. 构造最终 Markdown\n    header = \"## \U0001F4CA 批量查询汇总报告\\n\"\n \
+          \   summary_table = \"| \U0001F697 车辆 VIN 码 | \U0001F4E6 匹配备件数量 |\\n| :---\
+          \ | :--- |\\n\" + \"\\n\".join(summary_rows)\n    \n    footer = (\n   \
+          \     f\"\\n\\n> **统计摘要**\\n\"\n        f\"> * 本次成功查询车辆: **{query_count}**\
+          \ 台\\n\"\n        f\"> * 累计匹配雨刮产品: **{total_parts}** 件\\n\\n---\\n\"\n \
+          \   )\n    \n    details = \"# \U0001F50E 详细查询结果清单\\n\" + \"\".join(clean_tables)\n\
+          \    \n    return {\n        \"final_report\": header + summary_table +\
+          \ footer + details\n    }"
+        code_language: python3
+        outputs:
+          final_report:
+            children: null
+            type: string
+        selected: false
+        title: 拼接所有表格
+        type: code
+        variables:
+        - value_selector:
+          - '1770358254083'
+          - output
+          value_type: array[string]
+          variable: table_array
+      height: 52
+      id: '1770614245453'
+      position:
+        x: 5467.968103461078
+        y: 75.65428964943746
+      positionAbsolute:
+        x: 5467.968103461078
+        y: 75.65428964943746
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '用户您好！
+
+          目前已识别到如下VIN码
+
+
+          {{#1770348017384.vin_list#}}'
+        selected: false
+        title: 已提取的Vin码反馈
+        type: answer
+        variables: []
+      height: 119
+      id: '1770620839432'
+      position:
+        x: 2392.2633926832423
+        y: 222.66694391300058
+      positionAbsolute:
+        x: 2392.2633926832423
+        y: 222.66694391300058
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import re\n\ndef main(full_report: str, user_goal: str):\n    # 1.\
+          \ 判定是否为全量查询\n    is_full = any(word in user_goal for word in [\"全量\", \"\
+          全部\", \"所有\", \"展示\"])\n    \n    # 2. 按车辆标题切分报告 (使用正则兼容各种空格情况)\n    vin_sections\
+          \ = re.split(r'(?=### \U0001F697 车辆 VIN:)', full_report)\n    header_info\
+          \ = vin_sections[0] if not vin_sections[0].strip().startswith('###') else\
+          \ \"\"\n    vin_blocks = [s for s in vin_sections if s.strip().startswith('###')]\n\
+          \    \n    final_output = [header_info] if header_info else []\n    keyword\
+          \ = user_goal.strip()\n\n    for block in vin_blocks:\n        lines = block.strip().split('\\\
+          n')\n        if not lines: continue\n        \n        # 提取当前块的 VIN\n  \
+          \      vin_match = re.search(r'VIN:\\s*([A-Z0-9]{17})', lines[0])\n    \
+          \    current_vin = vin_match.group(1) if vin_match else \"识别中\"\n      \
+          \  \n        if is_full:\n            final_output.append(block)\n     \
+          \       continue\n\n        # 筛选逻辑\n        header_lines = []\n        data_rows\
+          \ = []\n        is_table_started = False\n        \n        for line in\
+          \ lines:\n            if line.startswith('| VIN') or line.startswith('|\
+          \ :---'):\n                is_table_started = True\n                header_lines.append(line)\n\
+          \            elif is_table_started and line.startswith('|'):\n         \
+          \       # 只有包含关键词的行才保留\n                if keyword in line:\n          \
+          \          data_rows.append(line)\n            elif not is_table_started:\n\
+          \                header_lines.append(line)\n\n        # 组装输出：如果有匹配行则显示表格，否则显示友好提示\n\
+          \        if data_rows:\n            # 关键：确保标题、表头、数据行之间都有换行符\n          \
+          \  final_output.append(\"\\n\".join(header_lines) + \"\\n\" + \"\\n\".join(data_rows))\n\
+          \        else:\n            final_output.append(f\"### \U0001F697 车辆 VIN:\
+          \ {current_vin}\\n> \U0001F4A1 **查询反馈**：未匹配到包含“{keyword}”的备件。\\n\")\n\n\
+          \    return {\"final_report\": \"\\n\\n---\\n\\n\".join(final_output)}"
+        code_language: python3
+        outputs:
+          final_report:
+            children: null
+            type: string
+        selected: false
+        title: 直接识别用户需求
+        type: code
+        variables:
+        - value_selector:
+          - '1770614245453'
+          - final_report
+          value_type: string
+          variable: full_report
+        - value_selector:
+          - '1770348017384'
+          - user_goal
+          value_type: string
+          variable: user_goal
+      height: 52
+      id: '1770627810173'
+      position:
+        x: 5859.142857142857
+        y: 454.42857142857156
+      positionAbsolute:
+        x: 5859.142857142857
+        y: 454.42857142857156
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '查询结果如下：
+
+          {{#1770627810173.final_report#}}'
+        selected: false
+        title: Answer 5
+        type: answer
+        variables: []
+      height: 119
+      id: '1770627851282'
+      position:
+        x: 6194
+        y: 369
+      positionAbsolute:
+        x: 6194
+        y: 369
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import re\n\ndef main(filtered_report: str):\n    # 核心逻辑：从已经筛选过的 Markdown\
+          \ 文本中提取数据行\n    lines = filtered_report.split('\\n')\n    excel_list = []\n\
+          \    \n    for line in lines:\n        # 只提取包含数据的表格行，跳过表头、分隔线和“未匹配”的提示文字\n\
+          \        if line.startswith('|') and 'VIN' not in line and '---' not in\
+          \ line:\n            # 分割字段\n            cells = [c.strip() for c in line.split('|')]\n\
+          \            # 过滤掉两端的空元素\n            cells = [c for c in cells if c]\n\
+          \            \n            if len(cells) >= 9:\n                excel_list.append({\n\
+          \                    \"VIN码\": cells[0],\n                    \"别称\": cells[1],\n\
+          \                    \"物料号\": cells[2],\n                    \"状态\": cells[3],\n\
+          \                    \"产品名称\": cells[4],\n                    \"二级名称\":\
+          \ cells[5],\n                    \"年份\": cells[6],\n                   \
+          \ \"尺寸\": cells[7],\n                    \"备注\": cells[8]\n            \
+          \    })\n    \n    return {\n        \"final_list\": excel_list\n    }"
+        code_language: python3
+        outputs:
+          final_list:
+            children: null
+            type: string
+        selected: false
+        title: 结构化准备excel数据
+        type: code
+        variables:
+        - value_selector:
+          - '1770627810173'
+          - final_report
+          value_type: string
+          variable: filtered_report
+      height: 52
+      id: '1770691559847'
+      position:
+        x: 6201.106534011847
+        y: 607.8113325371315
+      positionAbsolute:
+        x: 6201.106534011847
+        y: 607.8113325371315
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "def main():\n    # 这里就是你要求的“定制表”，开发人员只需在此处修改即可\n    config = {\n  \
+          \      \"access_code\": \"666888\",      # 访问口令\n        \"allowed_products\"\
+          : [\"风翼\", \"神翼\", \"博世\", \"雨刮\"], # 允许查询的产品范围\n        \"max_vin_count\"\
+          : 10,          # 允许批量查询的最大 VIN 数量\n        \"env\": \"production\"     \
+          \      # 运行环境\n    }\n    return config"
+        code_language: python3
+        outputs:
+          access_code:
+            children: null
+            type: string
+          allowed_products:
+            children: null
+            type: string
+          env:
+            children: null
+            type: string
+          max_vin_count:
+            children: null
+            type: string
+        selected: false
+        title: System_Config
+        type: code
+        variables: []
+      height: 52
+      id: '1770712266338'
+      position:
+        x: 915.2566876301968
+        y: 516.1968621897221
+      positionAbsolute:
+        x: 915.2566876301968
+        y: 516.1968621897221
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: 57bb405a-3419-4c4e-a00c-3d7771f2dc5c
+            value: '{{#1770712266338.access_code#}}'
+            varType: string
+            variable_selector:
+            - sys
+            - query
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 判断用户是否有口令
+        type: if-else
+      height: 124
+      id: '1770712371391'
+      position:
+        x: 1212.64484873695
+        y: 569.4262287235799
+      positionAbsolute:
+        x: 1212.64484873695
+        y: 569.4262287235799
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '用户无口令，可进行单个VIN码查询。
+
+          '
+        selected: false
+        title: 回复无口令用户
+        type: answer
+        variables: []
+      height: 100
+      id: '1770712381162'
+      position:
+        x: 1552.746515464443
+        y: 620.0234692724474
+      positionAbsolute:
+        x: 1552.746515464443
+        y: 620.0234692724474
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '已检测用户成功输入口令，可进行批量查询。
+
+          请用户输入需要查询的VIN码'
+        selected: false
+        title: 回复有口令用户
+        type: answer
+        variables: []
+      height: 116
+      id: '1770712473247'
+      position:
+        x: 1624.7338477989365
+        y: 481.4702177142737
+      positionAbsolute:
+        x: 1624.7338477989365
+        y: 481.4702177142737
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -433.0150559031388
+      y: 30.178552030634535
+      zoom: 0.5743491774985174
+  rag_pipeline_variables: []
