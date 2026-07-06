@@ -1,0 +1,507 @@
+app:
+  description: 根据用户问题生成只读 SQL Server T-SQL，查询竞品号、Bosch料号、OE号、库存和销量数据。
+  icon: 🔎
+  icon_background: '#E0F2FE'
+  icon_type: emoji
+  mode: workflow
+  name: SQL Server 竞品料号库存智能查询 Workflow
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tongyi:0.2.1@0924de1d15a8a35b0cc64ff396c68d5edddcfbc495a1e52ea57e8648434eff4b
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: jaguarliuu/rookie_text2data:1.0.3@3041f4cfe193deb03f716fedfd2e7dae1601021cf39f94c462af8d6babd1e3fd
+    version: null
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: SQL Server host reachable from Dify containers.
+    id: 092b4744-9cdf-45cb-b379-87ab9262ed5c
+    name: SQL_SERVER_HOST
+    selector:
+    - env
+    - SQL_SERVER_HOST
+    value: host.docker.internal
+    value_type: string
+  - description: SQL Server TCP port.
+    id: 1d2e486b-dc97-4dfd-b3bd-41ee3413b0bf
+    name: SQL_SERVER_PORT
+    selector:
+    - env
+    - SQL_SERVER_PORT
+    value: '1433'
+    value_type: string
+  - description: SQL Server database name.
+    id: d1ec4834-0878-4bfc-93fa-181b469043e9
+    name: SQL_SERVER_DATABASE
+    selector:
+    - env
+    - SQL_SERVER_DATABASE
+    value: Dealer Portal Agent
+    value_type: string
+  - description: Read-only SQL Server login.
+    id: 790636c5-ad90-45dc-93cb-0f6c74a8e476
+    name: SQL_SERVER_USERNAME
+    selector:
+    - env
+    - SQL_SERVER_USERNAME
+    value: dify_readonly
+    value_type: string
+  - description: Read-only SQL Server password.
+    id: 13cd6954-677e-4454-93b9-5fc35797b0d2
+    name: SQL_SERVER_PASSWORD
+    selector:
+    - env
+    - SQL_SERVER_PASSWORD
+    value: ''
+    value_type: secret
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: start_node-source-generate_sql_node-target
+      source: start_node
+      sourceHandle: source
+      target: generate_sql_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: generate_sql_node-source-validate_sql_node-target
+      source: generate_sql_node
+      sourceHandle: source
+      target: validate_sql_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: tool
+      id: validate_sql_node-source-execute_sql_node-target
+      source: validate_sql_node
+      sourceHandle: source
+      target: execute_sql_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: tool
+        targetType: code
+      id: execute_sql_node-source-format_result_node-target
+      source: execute_sql_node
+      sourceHandle: source
+      target: format_result_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: format_result_node-source-end_node-target
+      source: format_result_node
+      sourceHandle: source
+      target: end_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: 用户问题
+          max_length: 2000
+          options: []
+          required: true
+          type: paragraph
+          variable: user_question
+      height: 109
+      id: start_node
+      position:
+        x: 60
+        y: 260
+      positionAbsolute:
+        x: 60
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Generate read-only SQL Server SQL.
+        model:
+          completion_params:
+            temperature: 0
+          mode: chat
+          name: qwen3.7-max
+          provider: langgenius/tongyi/tongyi
+        prompt_config:
+          jinja2_variables: []
+        prompt_template:
+        - id: e3fd2de4-e650-44f4-8024-6ed5152ad1a9
+          role: system
+          text: "你是一个 SQL Server / T-SQL 生成器。只根据用户问题生成一条只读查询 SQL。\n\n固定数据库表：\ndbo.competitor_to_bosch_mapping_rows\n\
+            \n可用字段：\n- material: Bosch 料号 / 博世料号 / 物料号。按 text 处理，不能转数字。\n- competitor_pn:\
+            \ 标准化竞品号。可能包含品牌前缀和空格，例如 BAA 0001121002、DEL DRS7940。\n- competitor_pn_raw:\
+            \ 原始竞品号。\n- oe_cross_ref: OE 交叉参考号 / OE号。一个字段中可能用分号 ; 连接多个 OE 号，例如 001911023X;001911023C;001911023。\n\
+            - product_key: 产品 key。\n- product_key_description: 产品 key 描述，例如 Starter。\n\
+            - term_code_and_material_description: Term Code 和物料描述。\n- product_group_level_1_description:\
+            \ 产品组一级描述。\n- product_group_level_2_description: 产品组二级描述。\n- product_group_level_3_description:\
+            \ 产品组三级描述。\n- product_owning_region: 产品所属区域，例如 CN / EA / EU。\n- sales_status_final:\
+            \ 最终销售状态。\n- final_status: 最终状态。\n- stock_quantity: 当前库存数量。\n- stock_flag:\
+            \ 是否有库存标记。\n- last_12m_qty: 过去 12 个月销量数量。\n- last_12m_tgs: 过去 12 个月 TGS。\n\
+            - last_3y_qty: 过去 3 年销量数量。\n- last_3y_tgs: 过去 3 年 TGS。\n- date_time: 数据日期/更新时间。\n\
+            \n常用规则：\n- 查 Bosch 料号：material LIKE '%关键词%'。料号要保留前导 0。\n- 查竞品号：对 competitor_pn\
+            \ 和 competitor_pn_raw 做去空格、去横杠、去斜杠、去点号后匹配。\n  示例：\n  REPLACE(REPLACE(REPLACE(REPLACE(UPPER(competitor_pn),\
+            \ ' ', ''), '-', ''), '/', ''), '.', '') LIKE '%BAA0001121002%'\n- 查 OE\
+            \ 号：优先用 STRING_SPLIT(oe_cross_ref, ';') 临时拆分，再对 value 去空格、去横杠后精确或模糊匹配。\n\
+            - 查产品描述/产品名：product_key_description LIKE '%关键词%' OR term_code_and_material_description\
+            \ LIKE '%关键词%'。\n- 有库存：stock_quantity > 0 或 stock_flag 表示有库存。\n- 呆滞初筛：stock_quantity\
+            \ > 0 且 last_12m_qty = 0 或 last_12m_qty IS NULL。\n- 近 N 天更新：date_time\
+            \ >= DATEADD(day, -N, GETDATE())。注意这表示数据更新时间，不一定表示库存流水日期。\n- 用户问明细时，默认输出：\n\
+            \  material, competitor_pn, competitor_pn_raw, oe_cross_ref, product_key_description,\
+            \ term_code_and_material_description,\n  stock_quantity, stock_flag, last_12m_qty,\
+            \ last_3y_qty, sales_status_final, final_status, date_time\n- 用户问统计时，可以使用\
+            \ COUNT / SUM / AVG / GROUP BY / ORDER BY。\n\n硬规则：\n1. 只输出 SQL，不要 JSON，不要\
+            \ markdown，不要代码块，不要解释。\n2. SQL 只能是 SELECT 或 WITH 开头的只读查询。\n3. 禁止 INSERT、UPDATE、DELETE、DROP、ALTER、CREATE、TRUNCATE、COPY、CALL、EXEC、EXECUTE、MERGE、GRANT、REVOKE。\n\
+            4. 只能查询 dbo.competitor_to_bosch_mapping_rows。\n5. 字段名只能使用上面的字段列表。\n6.\
+            \ SQL Server 方言：使用 TOP，不要使用 LIMIT，不要使用 ILIKE。\n7. 料号、竞品号、OE号、产品名都按 text\
+            \ 处理，不要转数字。\n8. 明细查询必须加 TOP (50)。统计查询可不加 TOP，但如果返回分组明细，也要 TOP (50)。\n\
+            9. 不要 SELECT *。\n10. 如果用户问题无法从字段判断，返回：\nSELECT TOP (20) material, competitor_pn,\
+            \ oe_cross_ref, product_key_description, stock_quantity, stock_flag, last_12m_qty,\
+            \ last_3y_qty, date_time FROM dbo.competitor_to_bosch_mapping_rows"
+        - id: fb399d20-8aa2-4a15-a2ed-b3263458964f
+          role: user
+          text: 用户问题：{{#start_node.user_question#}}
+        reasoning_format: separated
+        selected: true
+        structured_output: null
+        structured_output_enabled: false
+        title: 生成T-SQL
+        type: llm
+        vision:
+          enabled: false
+      height: 116
+      id: generate_sql_node
+      position:
+        x: 358.75
+        y: 260
+      positionAbsolute:
+        x: 358.75
+        y: 260
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function stripCodeFence(text) {\n  let s = String(text || \"\").trim();\n\
+          \  s = s.replace(/^```(?:sql|tsql)?/i, \"\").replace(/```$/i, \"\").trim();\n\
+          \  const match = s.match(/(?:SELECT|WITH)\\b[\\s\\S]*/i);\n  if (match)\
+          \ s = match[0].trim();\n  return s.replace(/;+$/g, \"\").trim();\n}\n\n\
+          function containsForbidden(sql) {\n  const cleaned = sql.replace(/'[^']*'/g,\
+          \ \"''\");\n  const forbidden = /\\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|COPY|CALL|EXEC|EXECUTE|MERGE|GRANT|REVOKE|xp_|sp_)\\\
+          b/i;\n  return forbidden.test(cleaned);\n}\n\nfunction hasAllowedTableOnly(sql)\
+          \ {\n  const lower = sql.toLowerCase();\n  if (!lower.includes(\"dbo.competitor_to_bosch_mapping_rows\"\
+          )) return false;\n  const tableRefs = lower.match(/\\b(from|join)\\s+([a-z0-9_\\\
+          [\\]\\.\"]+)/g) || [];\n  return tableRefs.every(ref => ref.includes(\"\
+          dbo.competitor_to_bosch_mapping_rows\"));\n}\n\nfunction injectTop(sql)\
+          \ {\n  const lower = sql.toLowerCase();\n  const looksAggregate = /\\b(count|sum|avg|min|max)\\\
+          s*\\(/i.test(sql) || /\\bgroup\\s+by\\b/i.test(sql);\n  if (looksAggregate)\
+          \ return sql;\n  if (/^\\s*select\\s+top\\s*\\(/i.test(sql) || /^\\s*select\\\
+          s+top\\s+\\d+/i.test(sql)) return sql;\n  if (/^\\s*select\\s+/i.test(sql))\
+          \ return sql.replace(/^\\s*select\\s+/i, \"SELECT TOP (50) \");\n  return\
+          \ sql;\n}\n\nfunction main({ raw_sql }) {\n  let sql = stripCodeFence(raw_sql);\n\
+          \  const fallback = \"SELECT TOP (0) material, competitor_pn, oe_cross_ref,\
+          \ stock_quantity FROM dbo.competitor_to_bosch_mapping_rows\";\n  const errors\
+          \ = [];\n\n  if (!/^\\s*(select|with)\\b/i.test(sql)) errors.push(\"SQL\
+          \ 必须以 SELECT 或 WITH 开头。\");\n  if (/;/.test(sql)) errors.push(\"SQL 只能包含一条语句。\"\
+          );\n  if (/--|\\/\\*/.test(sql)) errors.push(\"SQL 不允许包含注释。\");\n  if (containsForbidden(sql))\
+          \ errors.push(\"SQL 包含禁止的写入或执行类关键字。\");\n  if (!hasAllowedTableOnly(sql))\
+          \ errors.push(\"SQL 只能查询 dbo.competitor_to_bosch_mapping_rows。\");\n  if\
+          \ (/\\blimit\\b/i.test(sql)) errors.push(\"SQL Server 查询不能使用 LIMIT。\");\n\
+          \  if (/select\\s+\\*/i.test(sql)) errors.push(\"不允许 SELECT *，请显式选择字段。\"\
+          );\n\n  if (errors.length) {\n    return { sql: fallback, error: errors.join(\"\
+          \ \") };\n  }\n\n  sql = injectTop(sql);\n  return { sql, error: \"\" };\n\
+          }"
+        code_language: javascript
+        desc: Validate generated SQL before execution.
+        outputs:
+          error:
+            children: null
+            type: string
+          sql:
+            children: null
+            type: string
+        selected: false
+        title: 校验SQL
+        type: code
+        variables:
+        - value_selector:
+          - generate_sql_node
+          - text
+          variable: raw_sql
+      height: 96
+      id: validate_sql_node
+      position:
+        x: 660
+        y: 260
+      positionAbsolute:
+        x: 660
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: Execute read-only SQL through rookie_text2data.
+        plugin_unique_identifier: jaguarliuu/rookie_text2data:1.0.3@3041f4cfe193deb03f716fedfd2e7dae1601021cf39f94c462af8d6babd1e3fd
+        provider_id: jaguarliuu/rookie_text2data/rookie_text2data
+        provider_name: jaguarliuu/rookie_text2data/rookie_text2data
+        provider_type: plugin
+        selected: false
+        title: 执行SQL Server查询
+        tool_configurations: {}
+        tool_label: rookie_excute_sql
+        tool_name: rookie_excute_sql
+        tool_node_version: '2'
+        tool_parameters:
+          db_name:
+            type: mixed
+            value: '{{#env.SQL_SERVER_DATABASE#}}'
+          db_type:
+            type: constant
+            value: sqlserver
+          host:
+            type: mixed
+            value: '{{#env.SQL_SERVER_HOST#}}'
+          password:
+            type: mixed
+            value: '{{#env.SQL_SERVER_PASSWORD#}}'
+          port:
+            type: mixed
+            value: '{{#env.SQL_SERVER_PORT#}}'
+          result_format:
+            type: constant
+            value: json
+          schema:
+            type: constant
+            value: dbo
+          sql:
+            type: variable
+            value:
+            - validate_sql_node
+            - sql
+          username:
+            type: mixed
+            value: '{{#env.SQL_SERVER_USERNAME#}}'
+        type: tool
+      height: 96
+      id: execute_sql_node
+      position:
+        x: 960
+        y: 260
+      positionAbsolute:
+        x: 960
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function parseMaybeJson(value, fallback) {\n  if (value == null) return\
+          \ fallback;\n  if (typeof value === \"object\") return value;\n  try { return\
+          \ JSON.parse(value); } catch (e) { return fallback; }\n}\n\nfunction rowsFromToolJson(toolJson)\
+          \ {\n  const parsed = parseMaybeJson(toolJson, []);\n  const first = Array.isArray(parsed)\
+          \ ? parsed[0] : parsed;\n  if (!first) return [];\n  if (Array.isArray(first.result))\
+          \ return first.result;\n  if (first.status === \"success\" && Array.isArray(first.data))\
+          \ return first.data;\n  if (Array.isArray(first.json_object?.result)) return\
+          \ first.json_object.result;\n  return [];\n}\n\nfunction cell(value) {\n\
+          \  if (value === null || value === undefined || value === \"\") return \"\
+          -\";\n  return String(value).replace(/\\|/g, \"\\\\|\").replace(/\\n/g,\
+          \ \" \");\n}\n\nfunction main({ question, sql, validation_error, tool_json,\
+          \ tool_text }) {\n  if (validation_error) {\n    return {\n      answer:\
+          \ \"SQL 安全校验未通过，已停止真实查询。\\n\\n原因：\" + validation_error + \"\\n\\n生成 SQL：\\\
+          n\" + sql,\n      sql,\n      row_count: 0,\n      rows_json: \"[]\"\n \
+          \   };\n  }\n\n  const rows = rowsFromToolJson(tool_json);\n  const lines\
+          \ = [];\n  lines.push(\"SQL Server 查询完成。\");\n  lines.push(\"\");\n  lines.push(\"\
+          问题：\" + (question || \"-\"));\n  lines.push(\"\");\n  lines.push(\"执行 SQL：\"\
+          );\n  lines.push(\"```sql\");\n  lines.push(sql);\n  lines.push(\"```\"\
+          );\n  lines.push(\"\");\n\n  if (!rows.length) {\n    lines.push(\"未查询到数据。\"\
+          );\n    if (tool_text) lines.push(String(tool_text));\n    return { answer:\
+          \ lines.join(\"\\n\"), sql, row_count: 0, rows_json: \"[]\" };\n  }\n\n\
+          \  const headers = Object.keys(rows[0]).slice(0, 12);\n  lines.push(\"共返回\
+          \ \" + rows.length + \" 条，展示前 \" + Math.min(rows.length, 20) + \" 条。\");\n\
+          \  lines.push(\"\");\n  lines.push(\"| \" + headers.join(\" | \") + \" |\"\
+          );\n  lines.push(\"|\" + headers.map(() => \"---\").join(\"|\") + \"|\"\
+          );\n  rows.slice(0, 20).forEach(row => {\n    lines.push(\"| \" + headers.map(h\
+          \ => cell(row[h])).join(\" | \") + \" |\");\n  });\n\n  return {\n    answer:\
+          \ lines.join(\"\\n\"),\n    sql,\n    row_count: rows.length,\n    rows_json:\
+          \ JSON.stringify(rows, null, 2)\n  };\n}"
+        code_language: javascript
+        desc: Format SQL Server rows for the user.
+        outputs:
+          answer:
+            children: null
+            type: string
+          row_count:
+            children: null
+            type: number
+          rows_json:
+            children: null
+            type: string
+          sql:
+            children: null
+            type: string
+        selected: false
+        title: 整理结果
+        type: code
+        variables:
+        - value_selector:
+          - start_node
+          - user_question
+          variable: question
+        - value_selector:
+          - validate_sql_node
+          - sql
+          variable: sql
+        - value_selector:
+          - validate_sql_node
+          - error
+          variable: validation_error
+        - value_selector:
+          - execute_sql_node
+          - json
+          variable: tool_json
+        - value_selector:
+          - execute_sql_node
+          - text
+          variable: tool_text
+      height: 80
+      id: format_result_node
+      position:
+        x: 1260
+        y: 260
+      positionAbsolute:
+        x: 1260
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - format_result_node
+          - answer
+          variable: answer
+        - value_selector:
+          - format_result_node
+          - sql
+          variable: sql
+        - value_selector:
+          - format_result_node
+          - row_count
+          variable: row_count
+        - value_selector:
+          - format_result_node
+          - rows_json
+          variable: rows_json
+        selected: false
+        title: 结束
+        type: end
+      height: 166
+      id: end_node
+      position:
+        x: 1560
+        y: 260
+      positionAbsolute:
+        x: 1560
+        y: 260
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -94.84757207574853
+      y: 82.82150382625827
+      zoom: 0.6964404506368993
+  rag_pipeline_variables: []
